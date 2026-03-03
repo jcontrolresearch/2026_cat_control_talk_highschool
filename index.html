@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>El software que mueve máquinas gigantes</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="dist/reveal.css" />
+  <link rel="stylesheet" href="dist/theme/black.css" id="theme" />
+
+  <style>
+    body { margin: 0; }
+  </style>
+</head>
+
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ========================================================= -->
+<!-- SLIDE 1 — PORTADA -->
+<!-- ========================================================= -->
+
+<section
+  data-background-image="https://s7d2.scene7.com/is/image/Caterpillar/CM20190913-448fc-c416f"
+  data-background-size="cover"
+  data-background-position="center"
+  style="position: relative;"
+>
+
+  <!-- Overlay -->
+  <div style="
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1;
+  "></div>
+
+  <!-- Content -->
+  <div style="position: relative; z-index: 2; text-align:center; color:white;">
+    <h1>El software que mueve máquinas gigantes</h1>
+    <h3>Control, código y decisiones en camiones off‑highway</h3>
+    <p><strong>Julio Martinez</strong><br>
+      Control Systems Engineer
+    </p>
+  </div>
+
+</section>
+
+<!-- ========================================================= -->
+<!-- SLIDE 2 — HOOK + VIDEO POPUP -->
+<!-- ========================================================= -->
+
+<section>
+
+  <h2>Hook / Icebreaker</h2>
+
+  <ul>
+    <li class="fragment">¿Quién usa apps todos los días?</li>
+
+    <li class="fragment">
+      ¿Quién ha visto un camión minero / off‑highway?
+      <button id="openVideoBtn" style="
+        margin-left:10px;
+        padding:6px 12px;
+        background:#FFCC00;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;
+        font-weight:600;
+      ">Ver video</button>
+    </li>
+
+    <li class="fragment">¿Quién cree que ese camión tiene software?</li>
+  </ul>
+
+  <blockquote class="fragment">
+    <strong>Un camión moderno es una computadora con ruedas.</strong>
+  </blockquote>
+
+  <!-- Modal -->
+  <div id="videoModal" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(4px);
+    z-index:9999;
+    justify-content:center;
+    align-items:center;
+    animation: fadeIn 0.3s ease;
+  ">
+    <div style="
+      position:relative;
+      width:80%;
+      max-width:500px;
+      background:#111;
+      padding:30px;
+      border-radius:12px;
+      text-align:center;
+      color:white;
+      animation: zoomIn 0.25s ease;
+    ">
+      <button id="closeVideoBtn" style="
+        position:absolute;
+        top:-40px;
+        right:0;
+        background:#FFCC00;
+        border:none;
+        padding:8px 14px;
+        border-radius:6px;
+        cursor:pointer;
+        font-weight:700;
+      ">Cerrar</button>
+
+      <h3 style="margin-bottom:10px;">Ver video</h3>
+      <p style="opacity:0.9; margin-bottom:20px;">
+        Haz clic para abrir el video en YouTube
+      </p>
+
+      <button onclick="window.open('https://www.youtube.com/shorts/mU3YQS6S-iw', '_blank')"
+        style="
+          padding:12px 20px;
+          background:#FFCC00;
+          border:none;
+          border-radius:6px;
+          cursor:pointer;
+          font-weight:700;
+        ">
+        Abrir video
+      </button>
+    </div>
+  </div>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+  </style>
+
+</section>
+
+<script>
+  const modal = document.getElementById("videoModal");
+  const openBtn = document.getElementById("openVideoBtn");
+  const closeBtn = document.getElementById("closeVideoBtn");
+
+  openBtn.onclick = () => {
+    modal.style.display = "flex";
+  };
+
+  closeBtn.onclick = () => {
+    modal.style.display = "none";
+  };
+</script>
+
+
+<!-- ========================================================= -->
+<!-- SLIDE 3 — TIMELINE -->
+<!-- ========================================================= -->
+<section data-background-color="#000000" style="color:#F2F2F2; padding:20px;">
+
+<style>
+/* Títulos */
+.timeline-title { font-size: 1.4rem; margin-bottom: 0.2rem; }
+.timeline-subtitle { font-size: 0.85rem; opacity: 0.75; margin-bottom: 1.5rem; }
+
+/* Contenedor principal */
+.timeline-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 0.5rem;
+  position: relative;
+  margin-bottom: 160px;
+}
+
+/* Tarjetas */
+.timeline-card {
+  width: 10%;
+  border-radius: 14px;
+  padding: 0.8rem;
+  text-align: center;
+  background: #1a1a1a;
+  border: 2px solid #444;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.timeline-card:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(255,255,255,0.25);
+  z-index: 10;
+}
+
+/* Colores */
+.edu { border-color: #1E3A8A; }
+.robot { border-color: #7C3AED; }
+.power { border-color: #9333EA; }
+.plc { border-color: #F97316; }
+.adas { border-color: #22C55E; }
+.cat { border-color: #FFCC00; }
+
+/* Círculo */
+.timeline-circle {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 auto 0.6rem auto;
+}
+
+/* Tooltip */
+.timeline-tooltip {
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20,20,20,0.95);
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  width: 200px;
+  text-align: center;
+  border: 1px solid #FFCC00;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.4);
+  z-index: 20;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-tooltip img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain !important;
+  border-radius: 8px;
+  background: #fff;
+  padding: 4px;
+}
+
+.timeline-card:hover .timeline-tooltip { opacity: 1; }
+
+/* Texto */
+.timeline-role { font-size: 0.8rem; font-weight: 700; margin-top: 0.3rem; }
+.timeline-company { font-size: 0.7rem; opacity: 0.75; margin-bottom: 0.5rem; }
+
+/* Conector */
+.timeline-connector {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  width: 8px;
+  height: 3px;
+  background: #FFCC00;
+  opacity: 0.6;
+}
+.timeline-card:last-child .timeline-connector { display: none; }
+
+/* Branch Robótica76 (versión compacta estable) */
+.branch-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 130px !important;
+  padding: 0.5rem !important;
+
+  background: #2b2b2b !important;
+  border: 2px solid #22C55E !important;
+  border-radius: 8px !important;
+
+  text-align: center !important;
+  color: white !important;
+}
+
+.branch-card img {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 2px !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+}
+
+.branch-title {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.1rem !important;
+}
+
+.branch-sub {
+  font-size: 0.6rem !important;
+  line-height: 1rem !important;
+}
+
+/* --- BARRA FIJA DIVIDIDA EN 2 --- */
+
+.timebar-container {
+  margin-top: 150px;
+  width: 100%;
+}
+
+.timebar-title {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.timebar {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #333;
+}
+
+.timebar-left {
+  width: 50%;
+  background: #1E3A8A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.timebar-right {
+  width: 50%;
+  background: #22C55E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+</style>
+
+<h2 class="timeline-title">Mi trayectoria profesional</h2>
+<h4 class="timeline-subtitle">Educación → Robótica → Electrónica de potencia → PLC → ADAS → Minería</h4>
+
+<div class="timeline-container">
+
+<!-- === TARJETAS === -->
+
+<div class="timeline-card edu fragment">
+  <div class="timeline-circle">📘</div>
+  <div class="timeline-tooltip">
+    <img src="https://tse4.mm.bing.net/th/id/OIP.PiEM6YUF6SuQ0aM8M2vRygHaH-?rs=1&pid=ImgDetMain&o=7&rm=3">
+    <div>Bachillerato general con enfoque en ciencias exactas.</div>
+  </div>
+  <div class="timeline-role">Bachillerato</div>
+  <div class="timeline-company">COBAO (2009)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card edu fragment">
+  <div class="timeline-circle">🎓</div>
+  <div class="timeline-tooltip">
+    <img src="https://servicios.utm.mx/posgrado/images/logo_utm.png">
+    <div>Ingeniero en Electrónica por la UTM.</div>
+  </div>
+  <div class="timeline-role">Ing. Electrónica</div>
+  <div class="timeline-company">UTM (2014)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card edu fragment">
+  <div class="timeline-circle">📚</div>
+  <div class="timeline-tooltip">
+    <img src="https://servicios.utm.mx/posgrado/images/logo_utm.png">
+    <div>Maestro en Ciencias de la Electrónica.</div>
+  </div>
+  <div class="timeline-role">Maestría</div>
+  <div class="timeline-company">UTM (2016)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card plc fragment">
+  <div class="timeline-circle">⚙️</div>
+  <div class="timeline-tooltip">
+    <img src="https://econ-tech.com/hs-fs/hubfs/logo%20ECON-2.png">
+    <div>Ingeniero de Automatización y Control Industrial.</div>
+  </div>
+  <div class="timeline-role">Control & Automation Engineer</div>
+  <div class="timeline-company">ECON Tech (2016)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card robot fragment">
+  <div class="timeline-circle">🤖</div>
+  <div class="timeline-tooltip">
+    <img src="https://tse2.mm.bing.net/th/id/OIP.NUi7WzjV_CNFlb4hWVFUpgAAAA">
+    <div>Robotics Engineer III & Control Engineer.</div>
+  </div>
+  <div class="timeline-role">Robotics Engineer III</div>
+  <div class="timeline-company">Amazon Robotics (2018)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card power fragment">
+  <div class="timeline-circle">⚡</div>
+  <div class="timeline-tooltip">
+    <img src="https://tse4.mm.bing.net/th/id/OIP.T0huWJCG6CH2eGu8Ehq08QHaHa">
+    <div>Ingeniero en electrónica de potencia.</div>
+  </div>
+  <div class="timeline-role">Power Electronics Engineer</div>
+  <div class="timeline-company">Spellman HV (2019)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card adas fragment">
+  <div class="timeline-circle">🚗</div>
+  <div class="timeline-tooltip">
+    <img src="https://e7.pngegg.com/pngimages/805/678/png-clipart-logo-continental-ag-brand-wordmark-others-automotive-company.png">
+    <div>ADAS Algorithms Engineer en Continental AG.</div>
+  </div>
+  <div class="timeline-role">ADAS Engineer</div>
+  <div class="timeline-company">Continental (2019)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card adas fragment">
+  <div class="timeline-circle">🧠</div>
+  <div class="timeline-tooltip">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/ZF_logo_STD_Blue_3CC.svg/1200px-ZF_logo_STD_Blue_3CC.svg.png">
+    <div>Control lateral y longitudinal, ADAS avanzado.</div>
+  </div>
+  <div class="timeline-role">ADAS Senior Engineer</div>
+  <div class="timeline-company">ZF Group (2023)</div>
+  <div class="timeline-connector"></div>
+</div>
+
+<div class="timeline-card cat fragment" id="cat-node" style="z-index:2;">
+  <div class="timeline-circle">🚜</div>
+
+  <div class="timeline-tooltip">
+    <img src="https://th.bing.com/th/id/OIP.oniCGI8JBBbupVMNA8ba1wHaBn">
+    <div>Control de camiones mineros 300+ ton.</div>
+  </div>
+
+  <div class="timeline-role">Senior Control Systems Engineer</div>
+  <div class="timeline-company">Caterpillar (2022–Actual)</div>
+
+  <div class="branch-line" style="
+    position:absolute;
+    top: 97%;
+    left: 50%;
+    width: 3px;
+    height: 14px;
+    background: #22C55E;
+    transform: translateX(-50%);
+    z-index:0;
+  "></div>
+
+  <div class="branch-card" style="
+    position:absolute;
+    top: calc(97% + 14px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index:3;
+  ">
+    <img src="https://github.com/Robotica76.png">
+    <div class="branch-title">Robótica76</div>
+    <div class="branch-sub">Taller de robótica para jóvenes<br>Fundado en 2022</div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- BARRA FIJA -->
+<div class="timebar-container">
+  <div class="timebar-title">Tiempo dedicado a mi desarrollo</div>
+
+  <div class="timebar">
+    <div class="timebar-left">10 años — Formación profesional</div>
+    <div class="timebar-right">10 años — Experiencia profesional</div>
+  </div>
+</div>
+
+</section>
+
+<!-- ========================================================= -->
+<!-- SLIDE 4 -->
+<!-- ========================================================= -->
+
+<section data-auto-animate data-auto-animate-duration="1.0" data-auto-animate-unmatched="fade">
+  <div class="vcard plc" data-id="card">
+
+    <div class="vcard-circle" data-id="icon">🎛️</div>
+
+    <div class="vcard-role" data-id="role">Teoría de Control</div>
+    <div class="vcard-company" data-id="company">Automatización &amp; Control Industrial</div>
+
+    <!-- TEXTO NARRATIVO -->
+    <div class="vcard-detail" data-id="detail">
+      <div class="text" style="font-size:0.95rem; line-height:1.35rem;">
+        <strong>El famoso “Ugh… Teoría de Control” 😵‍💫</strong><br><br>
+
+        Es complicada, abstracta y las matemáticas pueden ser una auténtica
+        <strong>montaña rusa emocional</strong> 🎢<br><br>
+
+        <strong>Los sospechosos habituales:</strong><br>
+        – “Es demasiado abstracto”<br>
+        – “Las matemáticas son una pesadilla”<br><br>
+
+        <strong>Pero espera… ¡sí tiene su lado divertido! 😄</strong><br>
+        Cuando el sistema por fin se estabiliza… <em>todo cobra sentido</em>.
+      </div>
+    </div>
+
+    <!-- ANIMACIÓN DE CONTROL -->
+    <div style="margin-top:20px;">
+      <div class="control-box">
+        <div class="setpoint">Setpoint</div>
+        <div class="response"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    /* Caja del sistema */
+    .control-box {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 120px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(56,189,248,0.35);
+    }
+
+    /* Línea de referencia */
+    .setpoint {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #22c55e;
+      opacity: 0.7;
+      font-size: 0.65rem;
+      color: #22c55e;
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    /* Respuesta del sistema */
+    .response {
+      position: absolute;
+      top: 50%;
+      left: -30px;
+      width: 18px;
+      height: 18px;
+      background: #f97316;
+      border-radius: 50%;
+      transform: translateY(-50%);
+      animation: controlResponse 4.5s ease-out infinite;
+      box-shadow: 0 0 12px rgba(249,115,22,0.9);
+    }
+
+    /* Animación tipo respuesta al escalón */
+    @keyframes controlResponse {
+      0%   { left: -30px; top: 20%; }
+      15%  { left: 25%;  top: 80%; }
+      30%  { left: 45%;  top: 30%; }
+      45%  { left: 60%;  top: 60%; }
+      65%  { left: 75%;  top: 48%; }
+      80%  { left: 85%;  top: 52%; }
+      100% { left: 95%;  top: 50%; }
+    }
+  </style>
+</section>
+
+<!-- ========================================================= -->
+<!-- SLIDE 5 -->
+<!-- ========================================================= -->
+
+<section data-background-color="#000000" style="color:#F2F2F2; padding:20px;">
+
+  <style>
+    /* SOLO el slide activo se centra */
+    .reveal .slides section.present {
+      display: grid;
+      align-content: center;
+    }
+
+    .fun-title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 0.3rem;
+    }
+
+    .fun-sub {
+      text-align: center;
+      font-size: 1rem;
+      opacity: 0.8;
+      margin-bottom: 1.6rem;
+    }
+
+    .fun-card {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 1.6rem;
+      border-radius: 22px;
+      background: radial-gradient(circle at top, #1f2933, #020617);
+      border: 2px solid #22c55e;
+      box-shadow: 0 0 30px rgba(34,197,94,0.35);
+    }
+
+    .fun-level {
+      display: inline-block;
+      background: #22c55e;
+      color: #000;
+      font-weight: 900;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
+    }
+
+    .fun-project {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 0.6rem;
+    }
+
+    .fun-desc {
+      font-size: 1rem;
+      line-height: 1.35rem;
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    .fun-bullets {
+      font-size: 0.95rem;
+      line-height: 1.35rem;
+      padding-left: 1.2rem;
+    }
+
+    .fun-bullets li {
+      margin-bottom: 0.4rem;
+    }
+
+    .arrow {
+      text-align: center;
+      font-size: 2rem;
+      opacity: 0.7;
+    }
+  </style>
+
+  <!-- SLIDE HORIZONTAL PADRE -->
+  <section>
+
+    <!-- PORTADA -->
+    <section>
+      <h2 class="fun-title fragment fade-down">🚀 PROYECTOS TERMINADOS</h2>
+      <p class="fun-sub fragment fade-up">
+        Ideas que pasaron del pizarrón… a la vida real
+      </p>
+      <div class="arrow fragment fade-up">⬇️</div>
+    </section>
+
+    <!-- PROYECTO 1 -->
+    <section>
+      <div class="fun-card fragment fade-up">
+        <div class="fun-level fragment bounce-in">LEVEL 2+ / LEVEL 3</div>
+        <div class="fun-project fragment fade-up">🚗 Trailer Reverse Assist</div>
+        <div class="fun-desc fragment fade-up">
+          Ayuda inteligente para dar reversa con remolque,
+          sin estrés y sin choques.
+        </div>
+        <ul class="fun-bullets fragment fade-up">
+          <li>📷 Cámara trasera inteligente</li>
+          <li>🧠 Predice el movimiento del remolque</li>
+          <li>🎯 Ideal para espacios pequeños</li>
+        </ul>
+      </div>
+      <div class="arrow fragment fade-up">⬇️</div>
+    </section>
+
+    <!-- PROYECTO 2 -->
+    <section>
+      <div class="fun-card fragment fade-up">
+        <div class="fun-level fragment bounce-in">LEVEL 1 / 2 – OFF ROAD</div>
+        <div class="fun-project fragment fade-up">⛰️ Traction Control + Hill Assist</div>
+        <div class="fun-desc fragment fade-up">
+          Evita que vehículos gigantes se deslicen
+          o se vayan hacia atrás en pendientes.
+        </div>
+        <ul class="fun-bullets fragment fade-up">
+          <li>⚙️ Control de fuerza y frenado</li>
+          <li>🚫 Evita retroceso</li>
+          <li>🏋️ Hasta 400 toneladas</li>
+        </ul>
+      </div>
+      <div class="arrow fragment fade-up">⬇️</div>
+    </section>
+
+    <!-- PROYECTO 3 -->
+    <section>
+      <div class="fun-card fragment fade-up">
+        <div class="fun-level fragment bounce-in">LEVEL 2</div>
+        <div class="fun-project fragment fade-up">💡 Intelligent High / Low Beam</div>
+        <div class="fun-desc fragment fade-up">
+          Luces inteligentes que piensan por el conductor.
+        </div>
+        <ul class="fun-bullets fragment fade-up">
+          <li>👀 Detecta autos y peatones</li>
+          <li>🚦 Reconoce señales</li>
+          <li>🌙 Mejor visión nocturna</li>
+        </ul>
+      </div>
+    </section>
+
+  </section>
+</section>
+
+<!-- ========================================================= -->
+<!-- SCRIPTS -->
+<!-- ========================================================= -->
+
+<script src="dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    transition: 'fade',
+    backgroundTransition: 'fade'
+  });
+</script>
+
+<!-- Modal script -->
+<script>
+  const modal = document.getElementById("videoModal");
+  const openBtn = document.getElementById("openVideoBtn");
+  const closeBtn = document.getElementById("closeVideoBtn");
+  const player = document.getElementById("ytPlayer");
+
+  openBtn.onclick = () => {
+    modal.style.display = "flex";
+    player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+  };
+
+  function closeModal() {
+    modal.style.display = "none";
+    player.contentWindow.postMessage('{"event":"command","func":"stopVideo","args":""}', '*');
+  }
+
+  closeBtn.onclick = closeModal;
+
+  window.addEventListener("message", (event) => {
+    if (event.data && event.data.info && event.data.info.playerState === 0) {
+      closeModal();
+    }
+  });
+</script>
+
+</body>
+</html>
