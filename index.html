@@ -632,41 +632,131 @@
 <!-- ========================================================= -->
 <!-- SLIDE 6 -->
 <!-- ========================================================= -->
-  
-<section data-background-color="#000000">
+
+  <section data-background-color="#050a15">
   <h2 class="fragment fade-down">Metodología V</h2>
   <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
-    La idea: <b>primero definimos</b> y <b>modelamos</b>… luego <b>probamos</b> hasta tener evidencia.
+    De la idea… a una máquina real que se mueve
   </p>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;">
-    <div class="fragment fade-right" style="border:2px solid #1E3A8A;border-radius:16px;padding:14px;background:#0f172a;">
-      <h3 style="margin:0 0 10px 0;">Izquierda (Diseño)</h3>
-      <ol style="margin:0;padding-left:18px;line-height:1.35rem;">
-        <li>Requerimientos</li>
-        <li>Análisis + matemáticas</li>
-        <li>Modelo + diseño</li>
-        <li>Implementación</li>
-      </ol>
-    </div>
+  <!-- CONTENEDOR -->
+  <div style="display:flex;justify-content:center;margin-top:10px;">
 
-    <div class="fragment fade-left" style="border:2px solid #22c55e;border-radius:16px;padding:14px;background:#0f172a;">
-      <h3 style="margin:0 0 10px 0;">Derecha (Pruebas)</h3>
-      <ol style="margin:0;padding-left:18px;line-height:1.35rem;">
-        <li>Unit tests</li>
-        <li>SIL (simulación)</li>
-        <li>HIL (hardware)</li>
-        <li>Pruebas en vehículo</li>
-        <li>Liberación</li>
-      </ol>
-    </div>
+    <!-- SVG METODOLOGÍA V -->
+    <svg width="900" height="420" viewBox="0 0 900 420">
+
+      <!-- ====== LÍNEA V ====== -->
+      <path d="M150 80 L450 330 L750 80"
+            fill="none"
+            stroke="#FFCC00"
+            stroke-width="6"
+            stroke-linecap="round"
+            stroke-dasharray="1200"
+            stroke-dashoffset="1200"
+            class="fragment"
+            data-fragment-index="0"
+            style="animation: drawV 1.2s ease-out forwards;" />
+
+      <!-- ====== IZQUIERDA: DEFINICIÓN ====== -->
+
+      <!-- Requerimientos -->
+      <g class="fragment fade-right" data-fragment-index="1">
+        <circle cx="150" cy="80" r="26" fill="#1E3A8A"/>
+        <text x="150" y="86" text-anchor="middle" fill="white" font-size="14">📄</text>
+        <text x="150" y="35" text-anchor="middle" fill="#e5e7eb" font-size="14">
+          Requerimientos
+        </text>
+      </g>
+
+      <!-- Análisis -->
+      <g class="fragment fade-right" data-fragment-index="2">
+        <circle cx="260" cy="150" r="26" fill="#1E3A8A"/>
+        <text x="260" y="156" text-anchor="middle" fill="white" font-size="14">🧠</text>
+        <text x="260" y="115" text-anchor="middle" fill="#e5e7eb" font-size="14">
+          Análisis
+        </text>
+      </g>
+
+      <!-- Matemáticas y modelo -->
+      <g class="fragment fade-right" data-fragment-index="3">
+        <circle cx="350" cy="230" r="26" fill="#1E3A8A"/>
+        <text x="350" y="236" text-anchor="middle" fill="white" font-size="14">📐</text>
+        <text x="350" y="195" text-anchor="middle" fill="#e5e7eb" font-size="14">
+          Matemáticas
+        </text>
+        <text x="350" y="212" text-anchor="middle" fill="#e5e7eb" font-size="13">
+          y Modelo
+        </text>
+      </g>
+
+      <!-- ====== FONDO DE LA V ====== -->
+
+      <!-- Implementación -->
+      <g class="fragment fade-up" data-fragment-index="4">
+        <circle cx="450" cy="330" r="32" fill="#9333EA"/>
+        <text x="450" y="337" text-anchor="middle" fill="white" font-size="16">💻</text>
+        <text x="450" y="375" text-anchor="middle" fill="#e5e7eb" font-size="15">
+          Código
+        </text>
+      </g>
+
+      <!-- ====== DERECHA: VALIDACIÓN ====== -->
+
+      <!-- Simulación -->
+      <g class="fragment fade-left" data-fragment-index="5">
+        <circle cx="550" cy="230" r="26" fill="#22C55E"/>
+        <text x="550" y="236" text-anchor="middle" fill="white" font-size="14">🧪</text>
+        <text x="550" y="195" text-anchor="middle" fill="#e5e7eb" font-size="14">
+          Simulación
+        </text>
+      </g>
+
+      <!-- Integración -->
+      <g class="fragment fade-left" data-fragment-index="6">
+        <circle cx="640" cy="150" r="26" fill="#22C55E"/>
+        <text x="640" y="156" text-anchor="middle" fill="white" font-size="14">🔗</text>
+        <text x="640" y="115" text-anchor="middle" fill="#e5e7eb" font-size="14">
+          Integración
+        </text>
+      </g>
+
+      <!-- Pruebas en vehículo -->
+      <g class="fragment fade-left" data-fragment-index="7">
+        <circle cx="750" cy="80" r="26" fill="#22C55E"/>
+        <text x="750" y="86" text-anchor="middle" fill="white" font-size="14">🚜</text>
+        <text x="750" y="35" text-anchor="middle" fill="#e5e7eb" font-size="14">
+          Vehículo real
+        </text>
+      </g>
+
+      <!-- ====== TEXTO CENTRAL ====== -->
+      <g class="fragment fade-up" data-fragment-index="8">
+        <rect x="330" y="260" rx="14" ry="14" width="240" height="48"
+              fill="#0f172a" stroke="#FFCC00"/>
+        <text x="450" y="290" text-anchor="middle"
+              fill="#FFCC00" font-size="15" font-weight="bold">
+          Verificación & Validación
+        </text>
+      </g>
+
+    </svg>
   </div>
 
-  <p class="fragment fade-up" style="margin-top:18px;">
-    ✅ <b>No se libera</b> cuando “compila”… se libera cuando <b>pasa pruebas</b>.
-  </p>
+  <!-- MENSAJE FINAL -->
+  <blockquote class="fragment fade-up" data-fragment-index="9" style="margin-top:12px;">
+    El código es solo una parte del camino.
+    <br/>
+    <b>Primero pensamos, modelamos y probamos.</b>
+  </blockquote>
+
+  <!-- ANIMACIÓN SVG -->
+  <style>
+    @keyframes drawV {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
 </section>
-  
+
 <!-- ========================================================= -->
 <!-- SCRIPTS -->
 <!-- ========================================================= -->
