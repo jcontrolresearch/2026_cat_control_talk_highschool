@@ -600,35 +600,376 @@
 <!-- SLIDE 5 -->
 <!-- ========================================================= -->
 
-  <section data-auto-animate data-background-color="#050a15">
-  <h2 data-id="t1">El reto real</h2>
-  <h3 class="fragment fade-up" data-id="t2">Controlar un camión rígido off-road (minería)</h3>
+<section data-background-color="#050a15">
+  <h2 class="fragment fade-down">El reto real</h2>
+  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+    Un camión rígido off-road necesita <b>control lateral</b> (seguir ruta) y <b>control longitudinal</b> (mantener velocidad).
+  </p>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;">
-    <div class="fragment fade-right" style="background:#0f172a;border:1px solid #23314f;border-radius:14px;padding:14px;">
-      <h4 style="margin:0 0 6px 0;color:#ffcc00;">Longitudinal</h4>
-      <ul style="margin:0;padding-left:18px;line-height:1.35rem;">
-        <li>Mantener velocidad en pendiente</li>
-        <li>Tracción / frenado con límites físicos</li>
-        <li>Confort y seguridad</li>
-      </ul>
+  <div class="fragment fade-up" style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:14px;margin-top:10px;align-items:stretch;">
+
+    <!-- PANEL IZQUIERDO: TOP VIEW (LATERAL) -->
+    <div style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:10px;position:relative;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-weight:900;color:#22c55e;">Top View (Lateral)</div>
+        <div style="font-size:12px;opacity:.8;">Verde = ruta · Amarillo = camión</div>
+      </div>
+      <canvas id="vSim_top" style="width:100%;height:280px;background:#050a15;border-radius:14px;border:1px solid #1f2a44;"></canvas>
+
+      <div style="position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span id="vSim_badge_lat" style="font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#22c55e;font-weight:900;">
+          e_y: 0.0 m
+        </span>
+        <span id="vSim_badge_delta" style="font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(255,204,0,.12);border:1px solid rgba(255,204,0,.28);color:#ffcc00;font-weight:900;">
+          δ: 0.0°
+        </span>
+      </div>
     </div>
 
-    <div class="fragment fade-left" style="background:#0f172a;border:1px solid #23314f;border-radius:14px;padding:14px;">
-      <h4 style="margin:0 0 6px 0;color:#22c55e;">Lateral</h4>
-      <ul style="margin:0;padding-left:18px;line-height:1.35rem;">
-        <li>Seguir una ruta (curvas)</li>
-        <li>Reducir error lateral</li>
-        <li>Evitar oscilaciones (“serpenteo”)</li>
-      </ul>
+    <!-- PANEL DERECHO: SIDE VIEW (LONGITUDINAL) -->
+    <div style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:10px;position:relative;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-weight:900;color:#ffcc00;">Side View (Longitudinal)</div>
+        <div style="font-size:12px;opacity:.8;">Pendiente + PID</div>
+      </div>
+      <canvas id="vSim_side" style="width:100%;height:280px;background:#050a15;border-radius:14px;border:1px solid #1f2a44;"></canvas>
+
+      <div style="position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span id="vSim_badge_v" style="font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(74,163,255,.12);border:1px solid rgba(74,163,255,.28);color:#4aa3ff;font-weight:900;">
+          v: 0.0 m/s
+        </span>
+        <span id="vSim_badge_grade" style="font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);color:#ef4444;font-weight:900;">
+          α: 0.0°
+        </span>
+      </div>
     </div>
+
   </div>
 
-  <blockquote class="fragment fade-up" style="margin-top:18px;">
-    Programamos <b>máquinas que se mueven</b> (no solo pantallas).
-  </blockquote>
-</section>
+  <!-- BOTONERA (para demo en vivo) -->
+  <div class="fragment fade-up" style="margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <button class="vbtn" onclick="window.vSim && vSim.bumpGrade()">⛰️ +Pendiente</button>
+    <button class="vbtn" onclick="window.vSim && vSim.bumpVref()">🚀 +Velocidad</button>
+    <button class="vbtn" onclick="window.vSim && vSim.bumpKp()">⚡ +Kp</button>
+    <button class="vbtn" onclick="window.vSim && vSim.bumpKi()">🧠 +Ki</button>
+    <button class="vbtn" onclick="window.vSim && vSim.reset()">↺ Reset</button>
+  </div>
 
+  <blockquote class="fragment fade-up" style="margin-top:12px;">
+    Aquí se ve el punto clave: <b>el software decide</b>, pero <b>la física manda</b>.
+  </blockquote>
+
+  <!-- estilos de botones -->
+  <style>
+    .vbtn{
+      background:#1b2742;border:1px solid #2b3c63;color:#e9eefc;
+      padding:8px 10px;border-radius:10px;cursor:pointer;font-weight:900;font-size:12px;
+    }
+    .vbtn:hover{filter:brightness(1.08)}
+  </style>
+
+  <!-- ============ SIMULACIÓN EMBEBIDA ============ -->
+  <script>
+    (function(){
+      // Evitar reinstanciar si ya existe
+      if (window.vSim) return;
+
+      const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+      const rad = (deg)=>deg*Math.PI/180;
+      const deg = (r)=>r*180/Math.PI;
+
+      const top = document.getElementById("vSim_top");
+      const side = document.getElementById("vSim_side");
+      const bEy = document.getElementById("vSim_badge_lat");
+      const bDelta = document.getElementById("vSim_badge_delta");
+      const bV = document.getElementById("vSim_badge_v");
+      const bG = document.getElementById("vSim_badge_grade");
+
+      const ctxT = top.getContext("2d");
+      const ctxS = side.getContext("2d");
+
+      // Resize HiDPI
+      function fitCanvas(c){
+        const dpr = window.devicePixelRatio||1;
+        const r = c.getBoundingClientRect();
+        c.width = Math.floor(r.width*dpr);
+        c.height = Math.floor(r.height*dpr);
+        const ctx = c.getContext("2d");
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+      }
+      function resizeAll(){ fitCanvas(top); fitCanvas(side); }
+      window.addEventListener("resize", resizeAll);
+      resizeAll();
+
+      // Parámetros didácticos (no propietarios)
+      const P = {
+        dt: 0.02,
+        // vehículo
+        L: 6.5,
+        // lateral
+        Ld: 18,
+        steerLim: rad(25),
+        // longitudinal
+        m: 220000,
+        mu: 0.55,
+        g: 9.81,
+        Crr: 0.02,
+        Ca: 90,
+        vref: 15.0,
+        gradeDeg: 0.0,
+        Kp: 18000,
+        Ki: 1200,
+        Kd: 1500
+      };
+
+      // Estado
+      const S = {
+        x: -10, y: 0, psi: 0, v: 0,
+        eInt: 0, ePrev: 0,
+        delta: 0, ey: 0,
+        t: 0,
+        trail: []
+      };
+
+      // Ruta de referencia (seno suave)
+      function refY(x){
+        const A=8, k=0.06;
+        return A*Math.sin(k*x);
+      }
+
+      // Pure Pursuit simple (target lookahead)
+      function lateralControl(){
+        // objetivo adelante sobre la ruta (aprox por x + Ld)
+        const tx = S.x + P.Ld;
+        const ty = refY(tx);
+
+        // error lateral al punto más cercano (aprox y - y_ref)
+        const yref = refY(S.x);
+        S.ey = (yref - S.y);
+
+        // target en frame del vehículo
+        const dx = tx - S.x;
+        const dy = ty - S.y;
+        const c = Math.cos(-S.psi), s = Math.sin(-S.psi);
+        const xV = dx*c - dy*s;
+        const yV = dx*s + dy*c;
+
+        const alpha = Math.atan2(yV, xV);
+        let delta = Math.atan2(2*P.L*Math.sin(alpha), P.Ld);
+        delta = clamp(delta, -P.steerLim, P.steerLim);
+        S.delta = delta;
+      }
+
+      // PID longitudinal (fuerza mandada)
+      function longitudinalControl(){
+        const grade = rad(P.gradeDeg);
+
+        const e = P.vref - S.v;
+        S.eInt += e*P.dt;
+        S.eInt = clamp(S.eInt, -50, 50);
+        const de = (e - S.ePrev)/P.dt;
+        S.ePrev = e;
+
+        let Fcmd = P.Kp*e + P.Ki*S.eInt + P.Kd*de;
+
+        const Froll = P.Crr*P.m*P.g*Math.cos(grade);
+        const Fdrag = P.Ca*S.v*S.v;
+        const Fgrade= P.m*P.g*Math.sin(grade);
+
+        const Fmax = P.mu*P.m*P.g*Math.cos(grade);
+        Fcmd = clamp(Fcmd, -Fmax, Fmax);
+
+        const a = (Fcmd - Froll - Fdrag - Fgrade)/P.m;
+        return a;
+      }
+
+      // Integración Euler
+      function step(){
+        lateralControl();
+        const a = longitudinalControl();
+
+        S.v = Math.max(0, S.v + a*P.dt);
+        const psiDot = (S.v/Math.max(0.2,P.L))*Math.tan(S.delta);
+        S.psi += psiDot*P.dt;
+        S.x += S.v*Math.cos(S.psi)*P.dt;
+        S.y += S.v*Math.sin(S.psi)*P.dt;
+
+        S.t += P.dt;
+        S.trail.push({x:S.x,y:S.y});
+        if(S.trail.length>600) S.trail.shift();
+      }
+
+      // Dibujo Top View
+      function drawTop(){
+        const w = top.getBoundingClientRect().width;
+        const h = top.getBoundingClientRect().height;
+        ctxT.clearRect(0,0,w,h);
+
+        // grid
+        ctxT.globalAlpha = 0.55;
+        ctxT.strokeStyle = "#23314f";
+        for(let gx=0;gx<w;gx+=50){ctxT.beginPath();ctxT.moveTo(gx,0);ctxT.lineTo(gx,h);ctxT.stroke();}
+        for(let gy=0;gy<h;gy+=50){ctxT.beginPath();ctxT.moveTo(0,gy);ctxT.lineTo(w,gy);ctxT.stroke();}
+        ctxT.globalAlpha = 1;
+
+        // cámara centrada en el camión
+        const scale = 4.2; // px/m
+        const cx = w*0.5, cy = h*0.55;
+        const W = (x,y)=>({X: cx + (x-S.x)*(-scale), Y: cy + (y-S.y)*(-scale) });
+
+        // ruta ref (verde)
+        ctxT.strokeStyle="#22c55e"; ctxT.lineWidth=2.5; ctxT.beginPath();
+        const start = S.x - 120, end = S.x + 220;
+        for(let x=start;x<=end;x+=2){
+          const p = W(x, refY(x));
+          if(x===start) ctxT.moveTo(p.X,p.Y); else ctxT.lineTo(p.X,p.Y);
+        }
+        ctxT.stroke();
+
+        // estela (amarillo)
+        ctxT.strokeStyle="#ffcc00"; ctxT.globalAlpha=0.7; ctxT.lineWidth=2; ctxT.beginPath();
+        for(let i=0;i<S.trail.length;i++){
+          const p = W(S.trail[i].x, S.trail[i].y);
+          if(i===0) ctxT.moveTo(p.X,p.Y); else ctxT.lineTo(p.X,p.Y);
+        }
+        ctxT.stroke();
+        ctxT.globalAlpha=1;
+
+        // camión (rectángulo)
+        const p0 = W(S.x,S.y);
+        ctxT.save();
+        ctxT.translate(p0.X,p0.Y);
+        ctxT.rotate(-S.psi + Math.PI);
+        ctxT.fillStyle="#ffcc00";
+        const bodyL = 28*scale/10; // visual
+        const bodyW = 10*scale/10;
+        ctxT.fillRect(-bodyL/2, -bodyW/2, bodyL, bodyW);
+
+        // heading line
+        ctxT.strokeStyle="#111"; ctxT.lineWidth=3;
+        ctxT.beginPath(); ctxT.moveTo(0,0); ctxT.lineTo(bodyL/2,0); ctxT.stroke();
+        ctxT.restore();
+
+        // badges
+        bEy.textContent = `e_y: ${Math.abs(S.ey).toFixed(2)} m`;
+        bDelta.textContent = `δ: ${deg(S.delta).toFixed(1)}°`;
+      }
+
+      // Dibujo Side View
+      function drawSide(){
+        const w = side.getBoundingClientRect().width;
+        const h = side.getBoundingClientRect().height;
+        ctxS.clearRect(0,0,w,h);
+
+        // grid
+        ctxS.globalAlpha = 0.55;
+        ctxS.strokeStyle = "#23314f";
+        for(let gx=0;gx<w;gx+=50){ctxS.beginPath();ctxS.moveTo(gx,0);ctxS.lineTo(gx,h);ctxS.stroke();}
+        for(let gy=0;gy<h;gy+=50){ctxS.beginPath();ctxS.moveTo(0,gy);ctxS.lineTo(w,gy);ctxS.stroke();}
+        ctxS.globalAlpha = 1;
+
+        // pendiente
+        const a = rad(P.gradeDeg);
+        const groundY = h*0.68;
+        const groundLen = w*0.95;
+        const x0 = w*0.03, x1 = x0 + groundLen;
+        const y1 = groundY - Math.tan(a)*(x1-x0)*0.25; // visual
+
+        ctxS.strokeStyle="#e5e7eb"; ctxS.lineWidth=3;
+        ctxS.beginPath(); ctxS.moveTo(x0, groundY); ctxS.lineTo(x1, y1); ctxS.stroke();
+
+        // camión (caja sobre la línea)
+        const t = (Math.sin(S.t*0.25)+1)/2; // se mueve adelante/atrás visualmente
+        const px = x0 + 0.15*groundLen + t*0.45*groundLen;
+        const py = groundY + (y1-groundY)*((px-x0)/(x1-x0));
+
+        ctxS.save();
+        ctxS.translate(px, py);
+        ctxS.rotate(-a);
+        ctxS.fillStyle="#ffcc00";
+        ctxS.fillRect(-34, -28, 68, 28);
+        // ruedas simples
+        ctxS.fillStyle="#111";
+        ctxS.beginPath(); ctxS.arc(-20, 2, 7, 0, Math.PI*2); ctxS.fill();
+        ctxS.beginPath(); ctxS.arc( 20, 2, 7, 0, Math.PI*2); ctxS.fill();
+        ctxS.restore();
+
+        // barrita de v vs vref
+        const barX=12, barY=14, barW=w-24, barH=12;
+        ctxS.fillStyle="#0b1326"; ctxS.fillRect(barX,barY,barW,barH);
+        ctxS.strokeStyle="#23314f"; ctxS.strokeRect(barX,barY,barW,barH);
+
+        const vmax = 35;
+        ctxS.fillStyle="#4aa3ff";
+        ctxS.fillRect(barX,barY,barW*clamp(S.v/vmax,0,1),barH);
+
+        ctxS.strokeStyle="#ffffff"; ctxS.setLineDash([6,6]);
+        const xRef = barX + barW*clamp(P.vref/vmax,0,1);
+        ctxS.beginPath(); ctxS.moveTo(xRef,barY-2); ctxS.lineTo(xRef,barY+barH+2); ctxS.stroke();
+        ctxS.setLineDash([]);
+
+        // badges
+        bV.textContent = `v: ${S.v.toFixed(2)} m/s  (vref ${P.vref.toFixed(1)})`;
+        bG.textContent = `α: ${P.gradeDeg.toFixed(1)}°`;
+      }
+
+      // Loop controlado por presencia del slide
+      let raf = null;
+      function loop(){
+        // 2 sub-steps para suavidad
+        step(); step();
+        drawTop();
+        drawSide();
+        raf = requestAnimationFrame(loop);
+      }
+
+      function start(){
+        if(raf) return;
+        resizeAll();
+        raf = requestAnimationFrame(loop);
+      }
+      function stop(){
+        if(!raf) return;
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
+
+      // API pública para botones
+      window.vSim = {
+        bumpGrade: ()=>{ P.gradeDeg = clamp(P.gradeDeg + 2, -10, 12); },
+        bumpVref:  ()=>{ P.vref = clamp(P.vref + 3, 0, 35); },
+        bumpKp:    ()=>{ P.Kp = clamp(P.Kp + 6000, 0, 80000); },
+        bumpKi:    ()=>{ P.Ki = clamp(P.Ki + 500, 0, 15000); },
+        reset:     ()=>{
+          P.gradeDeg=0; P.vref=15; P.Kp=18000; P.Ki=1200; P.Kd=1500;
+          S.x=-10; S.y=0; S.psi=0; S.v=0; S.eInt=0; S.ePrev=0; S.t=0; S.trail=[];
+          drawTop(); drawSide();
+        },
+        _start: start,
+        _stop: stop
+      };
+
+      // Hook con Reveal: corre solo cuando el slide está visible
+      function isThisSlideVisible(){
+        const s = document.querySelector("section.present");
+        return s && s.contains(top);
+      }
+
+      // Inicia si ya está visible
+      setTimeout(()=>{ if(isThisSlideVisible()) start(); }, 50);
+
+      // Si Reveal existe, escuchamos cambios
+      if(window.Reveal && Reveal.on){
+        Reveal.on('slidechanged', () => { isThisSlideVisible() ? start() : stop(); });
+        Reveal.on('overviewshown', stop);
+        Reveal.on('overviewhidden', () => { isThisSlideVisible() ? start() : stop(); });
+      } else {
+        // fallback: si no hay Reveal, lo dejamos correr
+        start();
+      }
+    })();
+  </script>
+</section>
 <!-- ========================================================= -->
 <!-- SLIDE 6 -->
 <!-- ========================================================= -->
