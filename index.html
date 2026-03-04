@@ -600,147 +600,73 @@
 <!-- SLIDE 5 -->
 <!-- ========================================================= -->
 
-<section data-background-color="#000000" style="color:#F2F2F2; padding:20px;">
+  <section data-auto-animate data-background-color="#050a15">
+  <h2 data-id="t1">El reto real</h2>
+  <h3 class="fragment fade-up" data-id="t2">Controlar un camión rígido off-road (minería)</h3>
 
-  <style>
-    /* SOLO el slide activo se centra */
-    .reveal .slides section.present {
-      display: grid;
-      align-content: center;
-    }
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;">
+    <div class="fragment fade-right" style="background:#0f172a;border:1px solid #23314f;border-radius:14px;padding:14px;">
+      <h4 style="margin:0 0 6px 0;color:#ffcc00;">Longitudinal</h4>
+      <ul style="margin:0;padding-left:18px;line-height:1.35rem;">
+        <li>Mantener velocidad en pendiente</li>
+        <li>Tracción / frenado con límites físicos</li>
+        <li>Confort y seguridad</li>
+      </ul>
+    </div>
 
-    .fun-title {
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 900;
-      margin-bottom: 0.3rem;
-    }
+    <div class="fragment fade-left" style="background:#0f172a;border:1px solid #23314f;border-radius:14px;padding:14px;">
+      <h4 style="margin:0 0 6px 0;color:#22c55e;">Lateral</h4>
+      <ul style="margin:0;padding-left:18px;line-height:1.35rem;">
+        <li>Seguir una ruta (curvas)</li>
+        <li>Reducir error lateral</li>
+        <li>Evitar oscilaciones (“serpenteo”)</li>
+      </ul>
+    </div>
+  </div>
 
-    .fun-sub {
-      text-align: center;
-      font-size: 1rem;
-      opacity: 0.8;
-      margin-bottom: 1.6rem;
-    }
-
-    .fun-card {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 1.6rem;
-      border-radius: 22px;
-      background: radial-gradient(circle at top, #1f2933, #020617);
-      border: 2px solid #22c55e;
-      box-shadow: 0 0 30px rgba(34,197,94,0.35);
-    }
-
-    .fun-level {
-      display: inline-block;
-      background: #22c55e;
-      color: #000;
-      font-weight: 900;
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      margin-bottom: 0.5rem;
-    }
-
-    .fun-project {
-      font-size: 1.5rem;
-      font-weight: 900;
-      margin-bottom: 0.6rem;
-    }
-
-    .fun-desc {
-      font-size: 1rem;
-      line-height: 1.35rem;
-      opacity: 0.9;
-      margin-bottom: 1rem;
-    }
-
-    .fun-bullets {
-      font-size: 0.95rem;
-      line-height: 1.35rem;
-      padding-left: 1.2rem;
-    }
-
-    .fun-bullets li {
-      margin-bottom: 0.4rem;
-    }
-
-    .arrow {
-      text-align: center;
-      font-size: 2rem;
-      opacity: 0.7;
-    }
-  </style>
-
-  <!-- SLIDE HORIZONTAL PADRE -->
-  <section>
-
-    <!-- PORTADA -->
-    <section>
-      <h2 class="fun-title fragment fade-down">🚀 PROYECTOS TERMINADOS</h2>
-      <p class="fun-sub fragment fade-up">
-        Ideas que pasaron del pizarrón… a la vida real
-      </p>
-      <div class="arrow fragment fade-up">⬇️</div>
-    </section>
-
-    <!-- PROYECTO 1 -->
-    <section>
-      <div class="fun-card fragment fade-up">
-        <div class="fun-level fragment bounce-in">LEVEL 2+ / LEVEL 3</div>
-        <div class="fun-project fragment fade-up">🚗 Trailer Reverse Assist</div>
-        <div class="fun-desc fragment fade-up">
-          Ayuda inteligente para dar reversa con remolque,
-          sin estrés y sin choques.
-        </div>
-        <ul class="fun-bullets fragment fade-up">
-          <li>📷 Cámara trasera inteligente</li>
-          <li>🧠 Predice el movimiento del remolque</li>
-          <li>🎯 Ideal para espacios pequeños</li>
-        </ul>
-      </div>
-      <div class="arrow fragment fade-up">⬇️</div>
-    </section>
-
-    <!-- PROYECTO 2 -->
-    <section>
-      <div class="fun-card fragment fade-up">
-        <div class="fun-level fragment bounce-in">LEVEL 1 / 2 – OFF ROAD</div>
-        <div class="fun-project fragment fade-up">⛰️ Traction Control + Hill Assist</div>
-        <div class="fun-desc fragment fade-up">
-          Evita que vehículos gigantes se deslicen
-          o se vayan hacia atrás en pendientes.
-        </div>
-        <ul class="fun-bullets fragment fade-up">
-          <li>⚙️ Control de fuerza y frenado</li>
-          <li>🚫 Evita retroceso</li>
-          <li>🏋️ Hasta 400 toneladas</li>
-        </ul>
-      </div>
-      <div class="arrow fragment fade-up">⬇️</div>
-    </section>
-
-    <!-- PROYECTO 3 -->
-    <section>
-      <div class="fun-card fragment fade-up">
-        <div class="fun-level fragment bounce-in">LEVEL 2</div>
-        <div class="fun-project fragment fade-up">💡 Intelligent High / Low Beam</div>
-        <div class="fun-desc fragment fade-up">
-          Luces inteligentes que piensan por el conductor.
-        </div>
-        <ul class="fun-bullets fragment fade-up">
-          <li>👀 Detecta autos y peatones</li>
-          <li>🚦 Reconoce señales</li>
-          <li>🌙 Mejor visión nocturna</li>
-        </ul>
-      </div>
-    </section>
-
-  </section>
+  <blockquote class="fragment fade-up" style="margin-top:18px;">
+    Programamos <b>máquinas que se mueven</b> (no solo pantallas).
+  </blockquote>
 </section>
 
+<!-- ========================================================= -->
+<!-- SLIDE 6 -->
+<!-- ========================================================= -->
+  
+<section data-background-color="#000000">
+  <h2 class="fragment fade-down">Metodología V</h2>
+  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+    La idea: <b>primero definimos</b> y <b>modelamos</b>… luego <b>probamos</b> hasta tener evidencia.
+  </p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;">
+    <div class="fragment fade-right" style="border:2px solid #1E3A8A;border-radius:16px;padding:14px;background:#0f172a;">
+      <h3 style="margin:0 0 10px 0;">Izquierda (Diseño)</h3>
+      <ol style="margin:0;padding-left:18px;line-height:1.35rem;">
+        <li>Requerimientos</li>
+        <li>Análisis + matemáticas</li>
+        <li>Modelo + diseño</li>
+        <li>Implementación</li>
+      </ol>
+    </div>
+
+    <div class="fragment fade-left" style="border:2px solid #22c55e;border-radius:16px;padding:14px;background:#0f172a;">
+      <h3 style="margin:0 0 10px 0;">Derecha (Pruebas)</h3>
+      <ol style="margin:0;padding-left:18px;line-height:1.35rem;">
+        <li>Unit tests</li>
+        <li>SIL (simulación)</li>
+        <li>HIL (hardware)</li>
+        <li>Pruebas en vehículo</li>
+        <li>Liberación</li>
+      </ol>
+    </div>
+  </div>
+
+  <p class="fragment fade-up" style="margin-top:18px;">
+    ✅ <b>No se libera</b> cuando “compila”… se libera cuando <b>pasa pruebas</b>.
+  </p>
+</section>
+  
 <!-- ========================================================= -->
 <!-- SCRIPTS -->
 <!-- ========================================================= -->
