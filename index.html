@@ -1104,57 +1104,71 @@
 <section data-background-color="#050a15">
   <h2 class="fragment fade-down">Del mundo real al software</h2>
   <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
-    Cómo una máquina en movimiento se convierte en números
+    El puente entre física y código
   </p>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px;align-items:start;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
 
-    <!-- MUNDO REAL -->
+    <!-- CONTINUO -->
     <div class="fragment fade-right"
          style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:14px;">
-      <h3 style="margin:0 0 8px 0;color:#22c55e;">Mundo real (continuo)</h3>
+      <h3 style="color:#22c55e;margin:0 0 8px 0;">Señal real (continua)</h3>
 
-      <canvas id="sig_cont"
-              style="width:100%;height:180px;background:#050a15;
-                     border-radius:12px;border:1px solid #1f2a44;"></canvas>
+      <svg width="100%" height="200" viewBox="0 0 400 200">
+        <path d="M0 100 
+                 Q50 40 100 100 
+                 T200 100 
+                 T300 100 
+                 T400 100"
+              fill="none" stroke="#22c55e" stroke-width="4">
+          <animate attributeName="stroke-dashoffset"
+                   from="600" to="0"
+                   dur="2s" repeatCount="indefinite"/>
+        </path>
+      </svg>
 
-      <p style="margin:10px 0 0 0;font-size:14px;opacity:.85;">
-        • Velocidad, posición, aceleración<br>
-        • Existen en <b>todo instante de tiempo</b>
+      <p style="font-size:14px;opacity:.85;">
+        Existe en todo instante de tiempo<br>
+        v(t), x(t)
       </p>
-
-      <div class="fragment fade-up" style="margin-top:10px;font-size:15px;">
-        v(t), x(t), a(t)
-      </div>
     </div>
 
-    <!-- COMPUTADORA -->
+    <!-- DISCRETO -->
     <div class="fragment fade-left"
          style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:14px;">
-      <h3 style="margin:0 0 8px 0;color:#ffcc00;">Computadora (muestreado)</h3>
+      <h3 style="color:#ffcc00;margin:0 0 8px 0;">Señal muestreada</h3>
 
-      <canvas id="sig_disc"
-              style="width:100%;height:180px;background:#050a15;
-                     border-radius:12px;border:1px solid #1f2a44;"></canvas>
+      <svg width="100%" height="200" viewBox="0 0 400 200">
+        <!-- puntos -->
+        <g fill="#ffcc00">
+          <circle cx="40" cy="100" r="5"/>
+          <circle cx="90" cy="60" r="5"/>
+          <circle cx="140" cy="100" r="5"/>
+          <circle cx="190" cy="140" r="5"/>
+          <circle cx="240" cy="100" r="5"/>
+          <circle cx="290" cy="60" r="5"/>
+          <circle cx="340" cy="100" r="5"/>
 
-      <p style="margin:10px 0 0 0;font-size:14px;opacity:.85;">
-        • La ECU mide cada Δt<br>
-        • Solo entiende <b>números</b>
-      </p>
+          <animateTransform attributeName="transform"
+            type="translate"
+            from="-40 0" to="40 0"
+            dur="2s" repeatCount="indefinite"/>
+        </g>
+      </svg>
 
-      <div class="fragment fade-up" style="margin-top:10px;font-size:15px;">
+      <p style="font-size:14px;opacity:.85;">
+        La computadora mide cada Δt<br>
         v[k], x[k]
-      </div>
+      </p>
     </div>
   </div>
 
-  <!-- ECUACIONES DISCRETAS -->
+  <!-- ECUACIONES -->
   <div class="fragment fade-up"
-       style="margin-top:16px;background:#0b1326;border:1px solid #23314f;
-              border-radius:16px;padding:14px;max-width:900px;margin-left:auto;margin-right:auto;">
-    <h3 style="margin:0 0 8px 0;color:#4aa3ff;">Actualización en tiempo discreto (Euler)</h3>
+       style="margin-top:16px;background:#0b1326;border:1px solid #23314f;border-radius:16px;padding:14px;">
+    <h3 style="color:#4aa3ff;margin:0 0 8px 0;">Euler discreto</h3>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:17px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:18px;">
       <div class="fragment highlight-yellow">
         v[k+1] = v[k] + a[k] · Δt
       </div>
@@ -1162,107 +1176,11 @@
         x[k+1] = x[k] + v[k] · Δt
       </div>
     </div>
-
-    <p class="fragment fade-up" style="margin-top:10px;font-size:14px;opacity:.85;">
-      Misma física — calculada paso a paso
-    </p>
   </div>
 
   <blockquote class="fragment fade-up" style="margin-top:16px;">
-    El software nunca ve el mundo real.<br>
-    Ve <b>muestras</b>.
+    El software solo ve <b>muestras</b>, no continuidad
   </blockquote>
-
-  <!-- ===== SCRIPT ROBUSTO (ARRANCA INMEDIATO) ===== -->
-  <script>
-  (function () {
-    let raf = null;
-    let started = false;
-
-    function startAnimation() {
-      if (started) return;
-      const c1 = document.getElementById("sig_cont");
-      const c2 = document.getElementById("sig_disc");
-      if (!c1 || !c2) return;
-
-      function fit(c) {
-        const dpr = window.devicePixelRatio || 1;
-        const r = c.getBoundingClientRect();
-        if (r.width === 0 || r.height === 0) return null;
-        c.width = r.width * dpr;
-        c.height = r.height * dpr;
-        const ctx = c.getContext("2d");
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        return ctx;
-      }
-
-      const ctx1 = fit(c1);
-      const ctx2 = fit(c2);
-      if (!ctx1 || !ctx2) return;
-
-      started = true;
-
-      let t = 0;
-      const Ts = 0.25;
-
-      function draw() {
-        const w = c1.clientWidth;
-        const h = c1.clientHeight;
-
-        // Señal continua
-        ctx1.clearRect(0, 0, w, h);
-        ctx1.strokeStyle = "#22c55e";
-        ctx1.lineWidth = 2;
-        ctx1.beginPath();
-        for (let i = 0; i < w; i++) {
-          const y = h / 2 - Math.sin((i + t) * 0.03) * h * 0.25;
-          i === 0 ? ctx1.moveTo(i, y) : ctx1.lineTo(i, y);
-        }
-        ctx1.stroke();
-
-        // Señal muestreada
-        ctx2.clearRect(0, 0, w, h);
-        ctx2.strokeStyle = "#23314f";
-        ctx2.beginPath();
-        ctx2.moveTo(0, h / 2);
-        ctx2.lineTo(w, h / 2);
-        ctx2.stroke();
-
-        ctx2.fillStyle = "#ffcc00";
-        for (let i = 0; i < w; i += 40) {
-          const y = h / 2 - Math.sin((i + t) * 0.03) * h * 0.25;
-          ctx2.beginPath();
-          ctx2.arc(i, y, 4, 0, Math.PI * 2);
-          ctx2.fill();
-        }
-
-        t += 1;
-        raf = requestAnimationFrame(draw);
-      }
-
-      draw();
-    }
-
-    function stopAnimation() {
-      if (raf) cancelAnimationFrame(raf);
-      raf = null;
-      started = false;
-    }
-
-    // 🔑 HOOK CORRECTO PARA REVEAL.JS
-    if (window.Reveal) {
-      Reveal.on('slidechanged', e => {
-        e.currentSlide.querySelector('#sig_cont')
-          ? setTimeout(startAnimation, 0)
-          : stopAnimation();
-      });
-      Reveal.on('ready', () => setTimeout(startAnimation, 0));
-      Reveal.on('overviewshown', stopAnimation);
-    } else {
-      setTimeout(startAnimation, 200);
-    }
-  })();
-  </script>
 </section>
 
 <!-- ========================================================= -->
