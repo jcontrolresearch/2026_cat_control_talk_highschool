@@ -1295,8 +1295,9 @@
       <h3 style="margin:0 0 8px 0;color:#22c55e;">Geometría (vista superior)</h3>
 
       <svg width="100%" height="260" viewBox="0 0 520 260">
-        <!-- Trayectoria -->
-        <path d="M30 200 C120 120, 220 120, 310 170 S440 240, 500 140"
+        <!-- Trayectoria (con id para reutilizar en animateMotion) -->
+        <path id="traj"
+              d="M30 200 C120 120, 220 120, 310 170 S440 240, 500 140"
               fill="none" stroke="#22c55e" stroke-width="4"/>
 
         <!-- Camión -->
@@ -1304,8 +1305,16 @@
           <rect x="-18" y="-10" width="46" height="20" rx="5" fill="#ffcc00"/>
           <circle cx="-6" cy="12" r="5" fill="#111"/>
           <circle cx="20" cy="12" r="5" fill="#111"/>
-          <animateMotion dur="4.5s" repeatCount="indefinite"
-            path="M30 200 C120 120, 220 120, 310 170 S440 240, 500 140"/>
+
+          <!-- Animación: velocidad variable + orientación según trayectoria -->
+          <animateMotion dur="4.5s"
+                         repeatCount="indefinite"
+                         rotate="auto"
+                         calcMode="linear"
+                         keyTimes="0;0.35;0.70;1"
+                         keyPoints="0;0.25;0.60;1">
+            <mpath href="#traj"></mpath>
+          </animateMotion>
         </g>
 
         <!-- Error lateral -->
@@ -1313,9 +1322,25 @@
               stroke="#ffcc00" stroke-width="4" marker-end="url(#y)"/>
         <text x="260" y="190" fill="#ffcc00" font-size="14">e</text>
 
-        <!-- Dirección -->
+        <!-- Dirección (δ) - arco -->
         <path d="M330 155 A35 35 0 0 1 355 130"
               fill="none" stroke="#4aa3ff" stroke-width="4"/>
+
+        <!-- Flecha δ animada (visual) -->
+        <g transform="translate(340 155)">
+          <!-- “hub” -->
+          <circle cx="0" cy="0" r="3" fill="#4aa3ff"/>
+          <!-- aguja -->
+          <line x1="0" y1="0" x2="28" y2="-10" stroke="#4aa3ff" stroke-width="4" stroke-linecap="round"/>
+          <!-- animación de la aguja (δ cambia) -->
+          <animateTransform attributeName="transform"
+                            type="rotate"
+                            dur="4.5s"
+                            repeatCount="indefinite"
+                            values="-20; 8; 28; -6; -20"
+                            keyTimes="0; 0.35; 0.70; 0.88; 1"/>
+        </g>
+
         <text x="360" y="130" fill="#4aa3ff" font-size="14">δ</text>
 
         <defs>
@@ -1344,6 +1369,89 @@
         ẋ = v·cos(ψ) &nbsp;&nbsp; ẏ = v·sin(ψ)
       </div>
 
+      <!-- NUEVO: HUD animado de v y δ -->
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;">
+
+        <!-- Velocidad v (barra + texto) -->
+        <div style="background:#0f172a;border:1px solid #23314f;border-radius:12px;padding:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="color:#a7b0c2;font-size:13px;">Velocidad v</span>
+            <span style="color:#a7b0c2;font-size:13px;opacity:.9;">(cambia durante la maniobra)</span>
+          </div>
+
+          <svg width="100%" height="34" viewBox="0 0 260 34">
+            <!-- fondo -->
+            <rect x="0" y="8" width="260" height="18" rx="9" fill="#0b1326" stroke="#23314f"/>
+            <!-- barra -->
+            <rect x="0" y="8" width="40" height="18" rx="9" fill="#22c55e">
+              <animate attributeName="width"
+                       dur="4.5s"
+                       repeatCount="indefinite"
+                       values="60; 120; 75; 160; 60"
+                       keyTimes="0; 0.35; 0.70; 0.88; 1"/>
+            </rect>
+
+            <!-- etiquetas (se alternan con opacidad) -->
+            <text x="10" y="22" fill="#050a15" font-size="12" font-weight="700">v</text>
+
+            <text x="210" y="22" fill="#a7b0c2" font-size="12" opacity="0">
+              6 m/s
+              <animate attributeName="opacity" dur="4.5s" repeatCount="indefinite"
+                       values="1;0;0;0;1" keyTimes="0;0.2;0.45;0.9;1"/>
+            </text>
+            <text x="205" y="22" fill="#a7b0c2" font-size="12" opacity="0">
+              12 m/s
+              <animate attributeName="opacity" dur="4.5s" repeatCount="indefinite"
+                       values="0;1;0;0;0" keyTimes="0;0.2;0.45;0.9;1"/>
+            </text>
+            <text x="205" y="22" fill="#a7b0c2" font-size="12" opacity="0">
+              8 m/s
+              <animate attributeName="opacity" dur="4.5s" repeatCount="indefinite"
+                       values="0;0;1;0;0" keyTimes="0;0.2;0.45;0.9;1"/>
+            </text>
+            <text x="200" y="22" fill="#a7b0c2" font-size="12" opacity="0">
+              14 m/s
+              <animate attributeName="opacity" dur="4.5s" repeatCount="indefinite"
+                       values="0;0;0;1;0" keyTimes="0;0.2;0.45;0.9;1"/>
+            </text>
+          </svg>
+        </div>
+
+        <!-- Ángulo δ (aguja tipo “dial”) -->
+        <div style="background:#0f172a;border:1px solid #23314f;border-radius:12px;padding:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="color:#a7b0c2;font-size:13px;">Ángulo de dirección δ</span>
+            <span style="color:#a7b0c2;font-size:13px;opacity:.9;">(giro/rumbo)</span>
+          </div>
+
+          <svg width="100%" height="70" viewBox="0 0 260 70">
+            <!-- semicirculo -->
+            <path d="M40 55 A90 90 0 0 1 220 55" fill="none" stroke="#23314f" stroke-width="6"/>
+            <path d="M40 55 A90 90 0 0 1 220 55" fill="none" stroke="#4aa3ff" stroke-width="6" opacity=".25"/>
+
+            <!-- centro -->
+            <circle cx="130" cy="55" r="6" fill="#4aa3ff"/>
+
+            <!-- aguja -->
+            <g id="needle" transform="rotate(-20 130 55)">
+              <line x1="130" y1="55" x2="200" y2="35" stroke="#4aa3ff" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="200" cy="35" r="4" fill="#4aa3ff"/>
+              <animateTransform attributeName="transform"
+                                type="rotate"
+                                dur="4.5s"
+                                repeatCount="indefinite"
+                                values="-22 130 55; 6 130 55; 30 130 55; -8 130 55; -22 130 55"
+                                keyTimes="0; 0.35; 0.70; 0.88; 1"/>
+            </g>
+
+            <text x="118" y="18" fill="#a7b0c2" font-size="12">−</text>
+            <text x="206" y="18" fill="#a7b0c2" font-size="12">+</text>
+            <text x="124" y="67" fill="#a7b0c2" font-size="12">δ</text>
+          </svg>
+        </div>
+
+      </div>
+
       <p style="margin-top:10px;font-size:14px;opacity:.85;">
         La geometría conecta la <b>dirección δ</b> con el movimiento.
       </p>
@@ -1354,7 +1462,6 @@
     Longitudinal controla <b>fuerza</b> · Lateral controla <b>dirección</b>.
   </blockquote>
 </section>
-  
 <!-- ========================================================= -->
 <!-- SCRIPTS -->
 <!-- ========================================================= -->
