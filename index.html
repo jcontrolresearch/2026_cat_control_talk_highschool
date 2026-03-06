@@ -1182,6 +1182,7 @@
     El software solo ve <b>muestras</b>, no continuidad
   </blockquote>
 </section>
+
   
 <!-- ========================================================= -->
 <!-- SLIDE 8-->
@@ -1275,6 +1276,82 @@
 
   <blockquote class="fragment fade-up" style="margin-top:14px;">
     Primero entendemos las fuerzas → luego diseñamos el control.
+  </blockquote>
+</section>
+
+<!-- ========================================================= -->
+<!-- SLIDE 9 -->
+<!-- ========================================================= -->
+  <section data-background-color="#050a15">
+  <h2 class="fragment fade-down">Modelo lateral del vehículo</h2>
+  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+    ¿Cómo gira el vehículo para seguir una trayectoria?
+  </p>
+
+  <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px;margin-top:14px;align-items:center;">
+
+    <!-- GEOMETRÍA -->
+    <div style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:16px;">
+      <h3 style="margin:0 0 8px 0;color:#22c55e;">Geometría (vista superior)</h3>
+
+      <svg width="100%" height="260" viewBox="0 0 520 260">
+        <!-- Trayectoria -->
+        <path d="M30 200 C120 120, 220 120, 310 170 S440 240, 500 140"
+              fill="none" stroke="#22c55e" stroke-width="4"/>
+
+        <!-- Camión -->
+        <g>
+          <rect x="-18" y="-10" width="46" height="20" rx="5" fill="#ffcc00"/>
+          <circle cx="-6" cy="12" r="5" fill="#111"/>
+          <circle cx="20" cy="12" r="5" fill="#111"/>
+          <animateMotion dur="4.5s" repeatCount="indefinite"
+            path="M30 200 C120 120, 220 120, 310 170 S440 240, 500 140"/>
+        </g>
+
+        <!-- Error lateral -->
+        <line x1="250" y1="150" x2="250" y2="195"
+              stroke="#ffcc00" stroke-width="4" marker-end="url(#y)"/>
+        <text x="260" y="190" fill="#ffcc00" font-size="14">e</text>
+
+        <!-- Dirección -->
+        <path d="M330 155 A35 35 0 0 1 355 130"
+              fill="none" stroke="#4aa3ff" stroke-width="4"/>
+        <text x="360" y="130" fill="#4aa3ff" font-size="14">δ</text>
+
+        <defs>
+          <marker id="y" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+            <polygon points="0,0 10,5 0,10" fill="#ffcc00"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- ECUACIONES -->
+    <div class="fragment fade-left"
+         style="background:#0b1326;border:1px solid #23314f;border-radius:16px;padding:16px;">
+      <h3 style="margin:0 0 10px 0;color:#22c55e;">Control y modelo</h3>
+
+      <div style="font-size:18px;line-height:1.6;">
+        <b>Control lateral (Stanley)</b><br>
+        δ = θₑ + atan( k·e / v )
+      </div>
+
+      <hr style="margin:12px 0;border-color:#23314f;">
+
+      <div style="font-size:16px;line-height:1.5;">
+        <b>Modelo cinemático (bicycle)</b><br>
+        ψ̇ = (v / L) · tan(δ)<br>
+        ẋ = v·cos(ψ) &nbsp;&nbsp; ẏ = v·sin(ψ)
+      </div>
+
+      <p style="margin-top:10px;font-size:14px;opacity:.85;">
+        La geometría conecta la <b>dirección δ</b> con el movimiento.
+      </p>
+    </div>
+  </div>
+
+  <blockquote class="fragment fade-up" style="margin-top:14px;">
+    Longitudinal controla <b>fuerza</b> · Lateral controla <b>dirección</b>.
   </blockquote>
 </section>
   
