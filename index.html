@@ -1480,6 +1480,85 @@
     Longitudinal controla <b>fuerza</b> · Lateral controla <b>dirección</b>.
   </blockquote>
 </section>
+
+<!-- ========================================================= -->
+<!-- SLIDE 10 -->
+<!-- ========================================================= -->
+  <section data-auto-animate data-background-color="#050a15">
+  <h2 data-id="discTitle">Del modelo al software: control en tiempo discreto</h2>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr 0.9fr;gap:18px;margin-top:10px;align-items:start;">
+
+    <!-- BLOQUE 1: ECUACIONES -->
+    <div class="fragment fade-up"
+         style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:16px;">
+      <h3 style="margin:0 0 8px 0;color:#22c55e;">1) Modelo discreto (Euler)</h3>
+
+      <p style="margin:0 0 10px 0;opacity:.85;">
+        La ECU ejecuta el control cada Δt (ej. 20 ms):
+      </p>
+
+      <div style="font-size:1.05rem;line-height:1.6;">
+        \[
+          v_{k+1}=v_k+\Delta t\,a_k
+        \]
+        \[
+          \psi_{k+1}=\psi_k+\Delta t\,\dot{\psi}_k
+        \]
+        \[
+          x_{k+1}=x_k+\Delta t\,v_k\cos(\psi_k)
+        \]
+        \[
+          y_{k+1}=y_k+\Delta t\,v_k\sin(\psi_k)
+        \]
+      </div>
+    </div>
+
+    <!-- BLOQUE 2: SOFTWARE -->
+    <div class="fragment fade-up"
+         style="background:#0b1326;border:1px solid #23314f;border-radius:16px;padding:16px;">
+      <h3 style="margin:0 0 8px 0;color:#4aa3ff;">2) Implementación en software</h3>
+
+      <pre style="margin:0;font-size:0.8rem;line-height:1.45;">
+<code>// Ciclo de control ECU
+while (ECU_ON) {
+  // Sensores
+  x, y, psi, v = read_state();
+
+  // Control lateral
+  delta = theta_e + atan(k * e / v);
+
+  // Dinámica (Euler)
+  psi = psi + dt * (v/L) * tan(delta);
+  x   = x   + dt * v * cos(psi);
+  y   = y   + dt * v * sin(psi);
+
+  // Actuadores
+  send_steering(delta);
+}
+</code>
+      </pre>
+    </div>
+
+    <!-- BLOQUE 3: TIEMPO REAL -->
+    <div class="fragment fade-up"
+         style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:16px;">
+      <h3 style="margin:0 0 8px 0;color:#ffcc00;">3) Tiempo real</h3>
+
+      <ul style="margin:0;padding-left:18px;line-height:1.6;font-size:0.95rem;">
+        <li>Periodo fijo: <b>Δt = 10–50 ms</b></li>
+        <li>Ejecuta en tarea <b>determinística</b></li>
+        <li>Lectura → control → actuador</li>
+        <li>Errores se acumulan si Δt es grande</li>
+        <li>Base de simulación y ECU real</li>
+      </ul>
+    </div>
+  </div>
+
+  <blockquote class="fragment fade-up" style="margin-top:16px;">
+    El vehículo no “resuelve ecuaciones”: <b>itera estados</b> en tiempo real.
+  </blockquote>
+</section>
 <!-- ========================================================= -->
 <!-- SCRIPTS -->
 <!-- ========================================================= -->
