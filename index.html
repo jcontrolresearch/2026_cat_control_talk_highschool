@@ -1683,103 +1683,107 @@ while (ECU_ON) {
 <!-- ¿Cómo se ve el software en el vehículo? -->
 <!-- ========================================================= -->
 
-<section data-auto-animate data-background-color="#050a15">
+  <section data-auto-animate data-background-color="#050a15">
   <h2 class="fragment fade-down">
-    ¿Cómo se ve el software en el vehículo?
+    ¿Dónde vive el software en el vehículo?
   </h2>
 
   <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
-    El control no es una ecuación: es una <b>arquitectura de software</b>.
+    Sensores miden · el <b>software decide</b> · actuadores ejecutan
   </p>
 
-  <div style="display:grid;
-              grid-template-columns:1fr 1.2fr 1fr;
-              gap:18px;
-              margin-top:18px;
-              align-items:stretch;">
+  <div style="display:flex;justify-content:center;margin-top:18px;">
+    <svg width="760" height="360" viewBox="0 0 760 360">
 
-    <!-- SENSORES -->
-    <div class="fragment fade-right"
-         style="background:#0f172a;border:1px solid #23314f;
-                border-radius:16px;padding:14px;">
-      <h3 style="margin:0 0 10px 0;color:#4aa3ff;">
-        Sensores
-      </h3>
-      <ul style="margin:0;padding-left:18px;line-height:1.5;">
-        <li>Velocidad</li>
-        <li>Posición</li>
-        <li>Ángulo de dirección</li>
-        <li>Aceleraciones</li>
-      </ul>
+      <!-- VEHÍCULO (TOP VIEW) -->
+      <g class="fragment fade-up">
+        <!-- cuerpo -->
+        <rect x="280" y="60" width="200" height="240" rx="40"
+              fill="#1f2937" stroke="#374151" stroke-width="2"/>
+        <!-- cabina -->
+        <rect x="310" y="90" width="140" height="120" rx="30"
+              fill="#111827"/>
 
-      <p style="margin-top:10px;font-size:0.85rem;opacity:.75;">
-        Datos del mundo real
-      </p>
-    </div>
+        <!-- ruedas -->
+        <rect x="260" y="80" width="18" height="60" rx="6" fill="#111"/>
+        <rect x="260" y="220" width="18" height="60" rx="6" fill="#111"/>
+        <rect x="482" y="80" width="18" height="60" rx="6" fill="#111"/>
+        <rect x="482" y="220" width="18" height="60" rx="6" fill="#111"/>
 
-    <!-- SOFTWARE / ECU -->
-    <div class="fragment fade-up"
-         style="background:#0b1326;border:2px solid #22c55e;
-                border-radius:18px;padding:16px;">
-      <h3 style="margin:0 0 12px 0;color:#22c55e;">
-        Software (ECU)
-      </h3>
+        <!-- ECU -->
+        <rect x="330" y="150" width="100" height="60" rx="10"
+              fill="#22c55e"/>
+        <text x="380" y="185" text-anchor="middle"
+              fill="#052e16" font-size="14" font-weight="700">
+          ECU
+        </text>
+        <text x="380" y="202" text-anchor="middle"
+              fill="#052e16" font-size="11">
+          Software
+        </text>
+      </g>
 
-      <div style="display:grid;gap:8px;font-size:0.95rem;">
+      <!-- SENSORES -->
+      <g class="fragment fade-right">
+        <!-- cámara -->
+        <rect x="340" y="30" width="80" height="22" rx="6"
+              fill="#4aa3ff"/>
+        <text x="380" y="46" text-anchor="middle"
+              fill="#020617" font-size="11">
+          Cámara
+        </text>
 
-        <div class="fragment fade-up"
-             style="background:#0f172a;border-radius:10px;padding:8px;">
-          🧠 <b>Estimación</b><br>
-          Estado, filtros, señales
-        </div>
+        <!-- radar -->
+        <circle cx="240" cy="120" r="26" fill="#4aa3ff"/>
+        <text x="240" y="125" text-anchor="middle"
+              fill="#020617" font-size="11">
+          Radar
+        </text>
 
-        <div class="fragment fade-up"
-             style="background:#0f172a;border-radius:10px;padding:8px;">
-          🎯 <b>Control</b><br>
-          Lateral, longitudinal
-        </div>
+        <!-- flechas sensores → ECU -->
+        <line x1="380" y1="52" x2="380" y2="150"
+              stroke="#4aa3ff" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="266" y1="120" x2="330" y2="170"
+              stroke="#4aa3ff" stroke-width="2" marker-end="url(#arrow)"/>
+      </g>
 
-        <div class="fragment fade-up"
-             style="background:#0f172a;border-radius:10px;padding:8px;">
-          ⏱ <b>Tiempo real</b><br>
-          Tareas cada 10–20 ms
-        </div>
+      <!-- ACTUADORES -->
+      <g class="fragment fade-left">
+        <!-- volante -->
+        <circle cx="540" cy="120" r="28" fill="#ffcc00"/>
+        <text x="540" y="125" text-anchor="middle"
+              fill="#3b2f00" font-size="11">
+          Volante
+        </text>
 
-        <div class="fragment fade-up"
-             style="background:#0f172a;border-radius:10px;padding:8px;">
-          🛡 <b>Seguridad</b><br>
-          Límites, fallbacks
-        </div>
+        <!-- frenos -->
+        <rect x="520" y="230" width="80" height="26" rx="8"
+              fill="#ffcc00"/>
+        <text x="560" y="248" text-anchor="middle"
+              fill="#3b2f00" font-size="11">
+          Frenos
+        </text>
 
-      </div>
+        <!-- flechas ECU → actuadores -->
+        <line x1="430" y1="180" x2="512" y2="130"
+              stroke="#ffcc00" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="430" y1="200" x2="520" y2="240"
+              stroke="#ffcc00" stroke-width="2" marker-end="url(#arrow)"/>
+      </g>
 
-      <p class="fragment fade-up"
-         style="margin-top:10px;font-size:0.85rem;opacity:.8;">
-        Código que se ejecuta miles de veces por segundo
-      </p>
-    </div>
-
-    <!-- ACTUADORES -->
-    <div class="fragment fade-left"
-         style="background:#0f172a;border:1px solid #23314f;
-                border-radius:16px;padding:14px;">
-      <h3 style="margin:0 0 10px 0;color:#ffcc00;">
-        Actuadores
-      </h3>
-      <ul style="margin:0;padding-left:18px;line-height:1.5;">
-        <li>Dirección</li>
-        <li>Freno</li>
-        <li>Motor</li>
-      </ul>
-
-      <p style="margin-top:10px;font-size:0.85rem;opacity:.75;">
-        Movimiento real del vehículo
-      </p>
-    </div>
+      <!-- defs -->
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10"
+                refX="8" refY="5" orient="auto">
+          <polygon points="0,0 10,5 0,10" fill="#e5e7eb"/>
+        </marker>
+      </defs>
+    </svg>
   </div>
 
   <blockquote class="fragment fade-up" style="margin-top:18px;">
-    El vehículo se mueve porque el <b>software decide</b> qué hacer en cada instante.
+    El vehículo no “piensa”: el <b>software</b> interpreta sensores
+    y controla actuadores en tiempo real.
   </blockquote>
 </section>
 
