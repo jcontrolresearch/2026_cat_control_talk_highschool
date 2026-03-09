@@ -2123,79 +2123,95 @@ while (ECU_ON) {
 <!-- FINAL -->
 <!-- ========================================================= -->
 <section data-background-color="#050a15">
-  <h2 class="fragment fade-down">
-    Gracias
+  <h2 class="fragment fade-down" style="letter-spacing:2px;">
+    GRACIAS
   </h2>
-
-  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+  <p class="fragment fade-up" style="opacity:.8;margin-top:-6px;">
     Contacto y recursos
   </p>
 
-  <div style="display:grid;
-              grid-template-columns:1fr 1fr;
-              gap:32px;
-              margin-top:28px;
-              align-items:center;">
+  <div style="display:flex;justify-content:center;margin-top:28px;">
+    <!-- TARJETA -->
+    <div class="fragment fade-up"
+         style="
+           background:linear-gradient(180deg,#0f172a,#0b1326);
+           border:1px solid #23314f;
+           border-radius:22px;
+           padding:28px 34px;
+           max-width:720px;
+           width:100%;
+           box-shadow:0 20px 60px rgba(0,0,0,.35);
+         ">
 
-    <!-- INFO -->
-    <div class="fragment fade-right"
-         style="background:#0f172a;
-                border:1px solid #23314f;
-                border-radius:16px;
-                padding:20px;">
-      <p style="font-size:1.2rem;margin:0 0 14px 0;">
-        <b>Julio Martinez</b>
-      </p>
+      <!-- HEADER -->
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div style="
+          width:56px;height:56px;border-radius:14px;
+          background:#22c55e;display:flex;align-items:center;justify-content:center;
+          font-weight:900;color:#052e16;font-size:22px;">
+          JM
+        </div>
+        <div>
+          <div style="font-size:1.35rem;font-weight:800;">Julio Martinez</div>
+          <div style="opacity:.75;">Control & Software Engineering</div>
+        </div>
+      </div>
 
-      <p style="margin:8px 0;">
-        📧 Julio.martinez1@cat.com
-      </p>
+      <!-- DIVIDER -->
+      <div style="height:1px;background:#23314f;margin:18px 0;"></div>
 
-      <p style="margin:8px 0;">
-        📞 +1&nbsp;951&nbsp;635&nbsp;5612
-      </p>
+      <!-- INFO GRID -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <!-- EMAIL -->
+        <div style="display:flex;gap:14px;align-items:center;">
+          <div style="
+            width:44px;height:44px;border-radius:12px;background:#4aa3ff;
+            display:flex;align-items:center;justify-content:center;
+            font-size:20px;color:#041018;">✉️</div>
+          <div>
+            <div style="opacity:.7;font-size:.85rem;">Email</div>
+            <div style="font-size:1.1rem;font-weight:700;">
+              Julio.martinez1@cat.com
+            </div>
+          </div>
+        </div>
 
-      <p style="margin:8px 0;">
-        💻 github.com/jcontrolresearch
-      </p>
+        <!-- PHONE -->
+        <div style="display:flex;gap:14px;align-items:center;">
+          <div style="
+            width:44px;height:44px;border-radius:12px;background:#ffcc00;
+            display:flex;align-items:center;justify-content:center;
+            font-size:20px;color:#3b2f00;">📞</div>
+          <div>
+            <div style="opacity:.7;font-size:.85rem;">Phone</div>
+            <div style="font-size:1.1rem;font-weight:700;">
+              +1 951 635 5612
+            </div>
+          </div>
+        </div>
 
-      <p class="fragment fade-up"
-         style="margin-top:16px;
-                font-size:0.9rem;
-                opacity:.8;">
-        Escanea el QR para guardar el contacto
-      </p>
+        <!-- GITHUB (SPAN FULL) -->
+        <div style="grid-column:1 / -1;display:flex;gap:14px;align-items:center;">
+          <div style="
+            width:44px;height:44px;border-radius:12px;background:#a78bfa;
+            display:flex;align-items:center;justify-content:center;
+            font-size:20px;color:#1f1147;">💻</div>
+          <div>
+            <div style="opacity:.7;font-size:.85rem;">GitHub</div>
+            <div style="font-size:1.35rem;font-weight:900;letter-spacing:.5px;">
+              github.com/jcontrolresearch
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="fragment fade-up"
+           style="margin-top:18px;opacity:.85;font-size:.95rem;">
+        👉 Toma una foto o guarda el link para explorarlo después
+      </div>
     </div>
-
-<!-- QR (FORMA CORRECTA, NO SE CORTA) -->
-<div class="fragment fade-left"
-     style="display:flex;
-            justify-content:center;
-            align-items:center;">
-
-  <div style="
-       background:white;
-       padding:20px;
-       border-radius:20px;
-       width:240px;
-       height:240px;
-       display:flex;
-       justify-content:center;
-       align-items:center;
-  ">
-    <img
-      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASYAAAEmAQAAAADnvwB3AAADb0lEQVR4nO2aTarrOhCEP0WCDOUdZCnyzg7ZWXsp2YE8DLSpN2g7Z/h8IBA7XGGwSWpQjX66qltJ/P9YLjtA8A/1ORTqALm3LFPHgSqAauoNgOZHZb87xiYp90YV1XLHaZKo8qosqZ89xguQ0ggT8wgsNytMaZj0SABzKh/j9W5UNYfcyb05jXlMAxH1Z3m9A1XW9zw6LAlPr79aeX0elf1+lGRUK+C03Js6Xo16l4wq/xivN6KmlBLzT+5cOwUKXB8/+fFT5nFJKQ2HZr8LVSXJ63253R2eAw4OXu05IEmyA7PfNdSbAzRokkW6VG9eTYoUefbcgWRebY20imoRb5ZBoxpVp4+xIwmaIt3TAAf1liV1zj+PF6otaXSmlFKBq+65k2UFmMdSlfuR2e8a6k3bssy9hZbLvak3qqnjX7BWJSc2o0lyyDIga1U+37AfZaHA"
-      style="
-        width:100%;
-        height:100%;
-        object-fit:contain;
-        display:block;
-      "
-      alt="QR de contacto Julio Martinez"
-    />
   </div>
-</div>
-
 
   <p class="fragment fade-up" style="margin-top:26px;opacity:.9;">
     🚀 Gracias por escuchar
