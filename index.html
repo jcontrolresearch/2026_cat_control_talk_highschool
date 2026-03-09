@@ -1683,107 +1683,287 @@ while (ECU_ON) {
 <!-- ¿Cómo se ve el software en el vehículo? -->
 <!-- ========================================================= -->
 
-  <section data-auto-animate data-background-color="#050a15">
-  <h2 class="fragment fade-down">
-    ¿Dónde vive el software en el vehículo?
-  </h2>
-
+ <section data-auto-animate data-background-color="#050a15">
+  <h2 class="fragment fade-down">Software en el vehículo (flujo de información)</h2>
   <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
-    Sensores miden · el <b>software decide</b> · actuadores ejecutan
+    Sensores → <b>ECU (software)</b> → Actuadores (frenos / volante)
   </p>
 
-  <div style="display:flex;justify-content:center;margin-top:18px;">
-    <svg width="760" height="360" viewBox="0 0 760 360">
-
-      <!-- VEHÍCULO (TOP VIEW) -->
-      <g class="fragment fade-up">
-        <!-- cuerpo -->
-        <rect x="280" y="60" width="200" height="240" rx="40"
-              fill="#1f2937" stroke="#374151" stroke-width="2"/>
-        <!-- cabina -->
-        <rect x="310" y="90" width="140" height="120" rx="30"
-              fill="#111827"/>
-
-        <!-- ruedas -->
-        <rect x="260" y="80" width="18" height="60" rx="6" fill="#111"/>
-        <rect x="260" y="220" width="18" height="60" rx="6" fill="#111"/>
-        <rect x="482" y="80" width="18" height="60" rx="6" fill="#111"/>
-        <rect x="482" y="220" width="18" height="60" rx="6" fill="#111"/>
-
-        <!-- ECU -->
-        <rect x="330" y="150" width="100" height="60" rx="10"
-              fill="#22c55e"/>
-        <text x="380" y="185" text-anchor="middle"
-              fill="#052e16" font-size="14" font-weight="700">
-          ECU
-        </text>
-        <text x="380" y="202" text-anchor="middle"
-              fill="#052e16" font-size="11">
-          Software
-        </text>
-      </g>
-
-      <!-- SENSORES -->
-      <g class="fragment fade-right">
-        <!-- cámara -->
-        <rect x="340" y="30" width="80" height="22" rx="6"
-              fill="#4aa3ff"/>
-        <text x="380" y="46" text-anchor="middle"
-              fill="#020617" font-size="11">
-          Cámara
-        </text>
-
-        <!-- radar -->
-        <circle cx="240" cy="120" r="26" fill="#4aa3ff"/>
-        <text x="240" y="125" text-anchor="middle"
-              fill="#020617" font-size="11">
-          Radar
-        </text>
-
-        <!-- flechas sensores → ECU -->
-        <line x1="380" y1="52" x2="380" y2="150"
-              stroke="#4aa3ff" stroke-width="2" marker-end="url(#arrow)"/>
-        <line x1="266" y1="120" x2="330" y2="170"
-              stroke="#4aa3ff" stroke-width="2" marker-end="url(#arrow)"/>
-      </g>
-
-      <!-- ACTUADORES -->
-      <g class="fragment fade-left">
-        <!-- volante -->
-        <circle cx="540" cy="120" r="28" fill="#ffcc00"/>
-        <text x="540" y="125" text-anchor="middle"
-              fill="#3b2f00" font-size="11">
-          Volante
-        </text>
-
-        <!-- frenos -->
-        <rect x="520" y="230" width="80" height="26" rx="8"
-              fill="#ffcc00"/>
-        <text x="560" y="248" text-anchor="middle"
-              fill="#3b2f00" font-size="11">
-          Frenos
-        </text>
-
-        <!-- flechas ECU → actuadores -->
-        <line x1="430" y1="180" x2="512" y2="130"
-              stroke="#ffcc00" stroke-width="2" marker-end="url(#arrow)"/>
-        <line x1="430" y1="200" x2="520" y2="240"
-              stroke="#ffcc00" stroke-width="2" marker-end="url(#arrow)"/>
-      </g>
-
-      <!-- defs -->
+  <div style="display:flex;justify-content:center;margin-top:14px;">
+    <svg width="920" height="430" viewBox="0 0 920 430" style="max-width:100%;">
       <defs>
-        <marker id="arrow" markerWidth="10" markerHeight="10"
-                refX="8" refY="5" orient="auto">
-          <polygon points="0,0 10,5 0,10" fill="#e5e7eb"/>
+        <!-- Flecha para líneas -->
+        <marker id="arrowW" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <polygon points="0,0 10,5 0,10" fill="#e5e7eb"></polygon>
         </marker>
+
+        <!-- “Glow” suave para las bolitas de datos -->
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2.2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <!-- Gradientes para “haz” de sensores (visual) -->
+        <linearGradient id="beamBlue" x1="0" x2="1">
+          <stop offset="0" stop-color="#4aa3ff" stop-opacity="0.55"/>
+          <stop offset="1" stop-color="#4aa3ff" stop-opacity="0.0"/>
+        </linearGradient>
+        <linearGradient id="beamOrange" x1="0" x2="1">
+          <stop offset="0" stop-color="#ffcc00" stop-opacity="0.55"/>
+          <stop offset="1" stop-color="#ffcc00" stop-opacity="0.0"/>
+        </linearGradient>
       </defs>
+
+      <!-- =========================
+           VEHÍCULO OFF-ROAD (TOP VIEW)
+           ========================= -->
+      <g class="fragment fade-up" id="truck">
+        <!-- sombra -->
+        <rect x="292" y="62" width="336" height="304" rx="44"
+              fill="#000" opacity="0.18"/>
+        <!-- chasis -->
+        <rect x="280" y="52" width="336" height="304" rx="44"
+              fill="#1f2937" stroke="#374151" stroke-width="2"/>
+
+        <!-- cabina (frente) -->
+        <path d="M330 82
+                 Q460 38 566 82
+                 L566 150
+                 Q460 170 330 150 Z"
+              fill="#111827" stroke="#334155" stroke-width="2"/>
+
+        <!-- caja/bed (parte trasera) -->
+        <path d="M314 168
+                 L602 168
+                 L580 326
+                 Q460 360 336 326 Z"
+              fill="#0b1326" stroke="#23314f" stroke-width="2"/>
+
+        <!-- detalle de “tolva” -->
+        <path d="M336 182 L584 182 L566 314 Q460 336 354 314 Z"
+              fill="#0f172a" stroke="#23314f" stroke-width="1.5" opacity="0.95"/>
+
+        <!-- ruedas (3 por lado) -->
+        <g fill="#0b0f18">
+          <rect x="260" y="92" width="24" height="56" rx="10"/>
+          <rect x="260" y="188" width="24" height="56" rx="10"/>
+          <rect x="260" y="284" width="24" height="56" rx="10"/>
+
+          <rect x="616" y="92" width="24" height="56" rx="10"/>
+          <rect x="616" y="188" width="24" height="56" rx="10"/>
+          <rect x="616" y="284" width="24" height="56" rx="10"/>
+        </g>
+
+        <!-- ECU (computadora) -->
+        <g class="fragment fade-in" id="ecu">
+          <rect x="430" y="198" width="110" height="62" rx="12"
+                fill="#22c55e" opacity="0.95"/>
+          <text x="485" y="224" text-anchor="middle"
+                fill="#052e16" font-size="14" font-weight="800">ECU</text>
+          <text x="485" y="242" text-anchor="middle"
+                fill="#052e16" font-size="11" font-weight="700">Software</text>
+        </g>
+      </g>
+
+      <!-- =========================
+           SENSORES (ALREDEDOR)
+           ========================= -->
+      <g class="fragment fade-right" id="sensors">
+
+        <!-- Cámara frontal -->
+        <g>
+          <rect x="424" y="20" width="122" height="28" rx="10"
+                fill="#4aa3ff" opacity="0.95"/>
+          <text x="485" y="39" text-anchor="middle" fill="#041018"
+                font-size="12" font-weight="800">CÁMARA</text>
+
+          <!-- Haz -->
+          <path d="M485 48 L450 88 L520 88 Z" fill="url(#beamBlue)"/>
+        </g>
+
+        <!-- LiDAR (techo) -->
+        <g>
+          <circle cx="560" cy="78" r="16" fill="#ffcc00"/>
+          <circle cx="560" cy="78" r="6" fill="#3b2f00" opacity="0.55"/>
+          <text x="590" y="83" fill="#ffcc00" font-size="12" font-weight="800">LiDAR</text>
+
+          <circle cx="560" cy="78" r="28" fill="none" stroke="#ffcc00" stroke-width="2" opacity="0.25"/>
+          <circle cx="560" cy="78" r="40" fill="none" stroke="#ffcc00" stroke-width="2" opacity="0.18"/>
+        </g>
+
+        <!-- Radar frontal -->
+        <g>
+          <circle cx="330" cy="120" r="18" fill="#4aa3ff"/>
+          <text x="330" y="124" text-anchor="middle" fill="#041018"
+                font-size="11" font-weight="900">RADAR</text>
+          <path d="M312 120 A28 28 0 0 1 348 120" fill="none" stroke="#4aa3ff" stroke-width="3" opacity="0.35"/>
+          <path d="M304 120 A38 38 0 0 1 356 120" fill="none" stroke="#4aa3ff" stroke-width="3" opacity="0.20"/>
+        </g>
+
+        <!-- GPS -->
+        <g>
+          <circle cx="640" cy="60" r="16" fill="#a78bfa"/>
+          <text x="668" y="65" fill="#a78bfa" font-size="12" font-weight="800">GPS</text>
+          <path d="M640 40 C650 44,650 56,640 60 C630 56,630 44,640 40 Z"
+                fill="#a78bfa" opacity="0.55"/>
+        </g>
+
+        <!-- Encoders / IMU -->
+        <g>
+          <rect x="660" y="300" width="150" height="30" rx="10"
+                fill="#94a3b8" opacity="0.9"/>
+          <text x="735" y="320" text-anchor="middle"
+                fill="#0b1326" font-size="12" font-weight="900">ENCODERS / IMU</text>
+        </g>
+      </g>
+
+      <!-- =========================
+           ACTUADORES (ALREDEDOR)
+           ========================= -->
+      <g class="fragment fade-left" id="actuators">
+
+        <!-- Volante (steering) -->
+        <g>
+          <circle cx="720" cy="160" r="22" fill="#ffcc00"/>
+          <circle cx="720" cy="160" r="10" fill="none" stroke="#3b2f00" stroke-width="3" opacity="0.55"/>
+          <path d="M710 160 H730" stroke="#3b2f00" stroke-width="3" opacity="0.55"/>
+          <path d="M720 150 V170" stroke="#3b2f00" stroke-width="3" opacity="0.55"/>
+          <text x="760" y="165" fill="#ffcc00" font-size="12" font-weight="800">VOLANTE</text>
+        </g>
+
+        <!-- Frenos -->
+        <g>
+          <rect x="700" y="250" width="110" height="34" rx="12"
+                fill="#ffcc00"/>
+          <text x="755" y="272" text-anchor="middle"
+                fill="#3b2f00" font-size="12" font-weight="900">FRENOS</text>
+        </g>
+      </g>
+
+      <!-- =========================
+           RUTAS (PATHS) PARA FLUJO
+           ========================= -->
+      <!-- Sensores -> ECU -->
+      <g class="fragment fade-in" id="paths_in" opacity="0.9">
+        <path id="p_cam_ecu" d="M485 48 C485 92, 485 135, 485 198"
+              fill="none" stroke="#4aa3ff" stroke-width="2.2" opacity="0.55" marker-end="url(#arrowW)"/>
+        <path id="p_radar_ecu" d="M330 120 C360 140, 400 170, 430 210"
+              fill="none" stroke="#4aa3ff" stroke-width="2.2" opacity="0.55" marker-end="url(#arrowW)"/>
+        <path id="p_lidar_ecu" d="M560 78 C545 120, 525 160, 520 198"
+              fill="none" stroke="#ffcc00" stroke-width="2.2" opacity="0.45" marker-end="url(#arrowW)"/>
+        <path id="p_gps_ecu" d="M640 60 C600 105, 560 145, 540 210"
+              fill="none" stroke="#a78bfa" stroke-width="2.2" opacity="0.45" marker-end="url(#arrowW)"/>
+      </g>
+
+      <!-- ECU -> Actuadores -->
+      <g class="fragment fade-in" id="paths_out" opacity="0.95">
+        <path id="p_ecu_steer" d="M540 220 C610 205, 660 190, 700 170"
+              fill="none" stroke="#22c55e" stroke-width="2.4" opacity="0.65" marker-end="url(#arrowW)"/>
+        <path id="p_ecu_brake" d="M540 242 C615 255, 665 262, 700 267"
+              fill="none" stroke="#22c55e" stroke-width="2.4" opacity="0.65" marker-end="url(#arrowW)"/>
+      </g>
+
+      <!-- =========================
+           “BOLITAS” (DATOS) EN MOVIMIENTO
+           ========================= -->
+      <!-- Entradas: Sensores -> ECU -->
+      <g class="fragment fade-in" filter="url(#glow)">
+        <!-- CAM -->
+        <circle r="4.2" fill="#4aa3ff">
+          <animateMotion dur="2.1s" repeatCount="indefinite" begin="0s">
+            <mpath href="#p_cam_ecu"></mpath>
+          </animateMotion>
+        </circle>
+        <circle r="3.6" fill="#4aa3ff" opacity="0.85">
+          <animateMotion dur="2.1s" repeatCount="indefinite" begin="0.7s">
+            <mpath href="#p_cam_ecu"></mpath>
+          </animateMotion>
+        </circle>
+        <circle r="3.0" fill="#4aa3ff" opacity="0.70">
+          <animateMotion dur="2.1s" repeatCount="indefinite" begin="1.4s">
+            <mpath href="#p_cam_ecu"></mpath>
+          </animateMotion>
+        </circle>
+
+        <!-- RADAR -->
+        <circle r="4.2" fill="#4aa3ff">
+          <animateMotion dur="2.4s" repeatCount="indefinite" begin="0.2s">
+            <mpath href="#p_radar_ecu"></mpath>
+          </animateMotion>
+        </circle>
+        <circle r="3.2" fill="#4aa3ff" opacity="0.75">
+          <animateMotion dur="2.4s" repeatCount="indefinite" begin="1.0s">
+            <mpath href="#p_radar_ecu"></mpath>
+          </animateMotion>
+        </circle>
+
+        <!-- LiDAR -->
+        <circle r="4.2" fill="#ffcc00">
+          <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.1s">
+            <mpath href="#p_lidar_ecu"></mpath>
+          </animateMotion>
+        </circle>
+        <circle r="3.2" fill="#ffcc00" opacity="0.75">
+          <animateMotion dur="2.2s" repeatCount="indefinite" begin="1.1s">
+            <mpath href="#p_lidar_ecu"></mpath>
+          </animateMotion>
+        </circle>
+
+        <!-- GPS -->
+        <circle r="4.0" fill="#a78bfa">
+          <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.4s">
+            <mpath href="#p_gps_ecu"></mpath>
+          </animateMotion>
+        </circle>
+      </g>
+
+      <!-- Salidas: ECU -> Actuadores -->
+      <g class="fragment fade-in" filter="url(#glow)">
+        <!-- Steering command -->
+        <circle r="4.2" fill="#22c55e">
+          <animateMotion dur="1.9s" repeatCount="indefinite" begin="0s">
+            <mpath href="#p_ecu_steer"></mpath>
+          </animateMotion>
+        </circle>
+        <circle r="3.2" fill="#22c55e" opacity="0.75">
+          <animateMotion dur="1.9s" repeatCount="indefinite" begin="0.65s">
+            <mpath href="#p_ecu_steer"></mpath>
+          </animateMotion>
+        </circle>
+
+        <!-- Brake command -->
+        <circle r="4.2" fill="#22c55e">
+          <animateMotion dur="2.0s" repeatCount="indefinite" begin="0.25s">
+            <mpath href="#p_ecu_brake"></mpath>
+          </animateMotion>
+        </circle>
+        <circle r="3.2" fill="#22c55e" opacity="0.75">
+          <animateMotion dur="2.0s" repeatCount="indefinite" begin="1.0s">
+            <mpath href="#p_ecu_brake"></mpath>
+          </animateMotion>
+        </circle>
+      </g>
+
+      <!-- Etiqueta resumen (mini-leyenda) -->
+      <g class="fragment fade-up">
+        <rect x="26" y="328" width="250" height="72" rx="14"
+              fill="#0f172a" stroke="#23314f"/>
+        <text x="46" y="356" fill="#a7b0c2" font-size="12">
+          <tspan fill="#4aa3ff" font-weight="800">Azul:</tspan> datos de sensores
+        </text>
+        <text x="46" y="378" fill="#a7b0c2" font-size="12">
+          <tspan fill="#22c55e" font-weight="800">Verde:</tspan> comandos (control)
+        </text>
+      </g>
+
     </svg>
   </div>
 
-  <blockquote class="fragment fade-up" style="margin-top:18px;">
-    El vehículo no “piensa”: el <b>software</b> interpreta sensores
-    y controla actuadores en tiempo real.
+  <blockquote class="fragment fade-up" style="margin-top:10px;">
+    El <b>software</b> transforma “datos” en “acciones” en tiempo real.
   </blockquote>
 </section>
 
