@@ -501,6 +501,125 @@
 </section>
 
 <!-- ========================================================= -->
+<!-- SLIDE Brunovsky -->
+<!-- ========================================================= -->
+<section data-auto-animate data-background-color="#050a15">
+  <h2 class="fragment fade-down">Transformada de Brunovsky</h2>
+
+  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+    Un <b>difeomorfismo</b> que reordena el estado para revelar
+    <b>cadenas de integradores</b>.
+  </p>
+
+  <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px;margin-top:14px;align-items:center;">
+
+    <!-- ANIMACIÓN GEOMÉTRICA -->
+    <div class="fragment fade-right"
+         style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:14px;">
+      <h3 style="margin:0 0 8px 0;color:#22c55e;">
+        Difeomorfismo (espacio de estados)
+      </h3>
+
+      <svg width="100%" height="260" viewBox="0 0 360 260">
+        <!-- Malla deformada -->
+        <g id="warped" class="fragment fade-in">
+          <!-- verticales -->
+          <path d="M40 30 C60 120, 60 160, 40 230" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+          <path d="M90 30 C120 110,120 170, 90 230" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+          <path d="M140 30 C170 120,170 160,140 230" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+          <path d="M190 30 C220 110,220 170,190 230" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+
+          <!-- horizontales -->
+          <path d="M30 70 C120 90,200 90,290 70" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+          <path d="M30 130 C120 150,200 150,290 130" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+          <path d="M30 190 C120 210,200 210,290 190" stroke="#4aa3ff" stroke-width="2" fill="none"/>
+
+          <text x="16" y="22" fill="#4aa3ff" font-size="12">x</text>
+        </g>
+
+        <!-- Flecha del mapeo -->
+        <g class="fragment fade-in">
+          <line x1="300" y1="130" x2="330" y2="130"
+                stroke="#ffcc00" stroke-width="3"
+                marker-end="url(#arrow)"/>
+          <text x="300" y="118" fill="#ffcc00" font-size="12">Φ(x)</text>
+        </g>
+
+        <!-- Malla rectificada (Brunovsky) -->
+        <g id="canonical" class="fragment fade-in">
+          <!-- verticales -->
+          <line x1="330" y1="30" x2="330" y2="230" stroke="#22c55e" stroke-width="2"/>
+          <line x1="360" y1="30" x2="360" y2="230" stroke="#22c55e" stroke-width="2"/>
+          <line x1="390" y1="30" x2="390" y2="230" stroke="#22c55e" stroke-width="2"/>
+
+          <!-- horizontales -->
+          <line x1="330" y1="70" x2="390" y2="70" stroke="#22c55e" stroke-width="2"/>
+          <line x1="330" y1="130" x2="390" y2="130" stroke="#22c55e" stroke-width="2"/>
+          <line x1="330" y1="190" x2="390" y2="190" stroke="#22c55e" stroke-width="2"/>
+
+          <text x="334" y="22" fill="#22c55e" font-size="12">z</text>
+        </g>
+
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10"
+                  refX="8" refY="5" orient="auto">
+            <polygon points="0,0 10,5 0,10" fill="#ffcc00"/>
+          </marker>
+        </defs>
+      </svg>
+
+      <p style="margin-top:8px;font-size:13px;opacity:.8;">
+        El difeomorfismo <b>Φ</b> “endereza” el sistema.
+      </p>
+    </div>
+
+    <!-- EXPLICACIÓN DE CONTROL -->
+    <div class="fragment fade-left"
+         style="background:#0b1326;border:1px solid #23314f;border-radius:16px;padding:16px;">
+      <h3 style="margin:0 0 10px 0;color:#22c55e;">
+        Interpretación en control
+      </h3>
+
+      <div style="font-size:16px;line-height:1.55;">
+        <p>
+          Un sistema no lineal:
+        </p>
+        \[
+          \dot{x}=f(x)+g(x)u
+        \]
+
+        <p>
+          se transforma mediante un <b>difeomorfismo</b>:
+        </p>
+        \[
+          z=\Phi(x)
+        \]
+
+        <p>
+          en la <b>forma de Brunovsky</b>:
+        </p>
+        \[
+          \dot z_1=z_2,\;
+          \dot z_2=z_3,\;
+          \dots,\;
+          \dot z_n=v
+        \]
+      </div>
+
+      <p style="margin-top:10px;font-size:14px;opacity:.85;">
+        El control pasa de “complejo” a
+        <b>colocar polos en integradores</b>.
+      </p>
+    </div>
+  </div>
+
+  <blockquote class="fragment fade-up" style="margin-top:14px;">
+    Brunovsky no simplifica el sistema:
+    <b>elige coordenadas donde el control es evidente</b>.
+  </blockquote>
+</section>
+
+<!-- ========================================================= -->
 <!-- SLIDE 4 -->
 <!-- ========================================================= -->
 
