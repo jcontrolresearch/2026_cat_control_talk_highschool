@@ -1603,16 +1603,16 @@
 <!-- SLIDE 10 -->
 <!-- ========================================================= -->
   <section data-auto-animate data-background-color="#050a15">
-  <h2 data-id="discTitle">Del modelo al software: control en tiempo discreto</h2>
+  <h4 data-id="discTitle">Del modelo al software: control en tiempo discreto</h4>
 
   <div style="display:grid;grid-template-columns:1.2fr 1fr 0.9fr;gap:18px;margin-top:10px;align-items:start;">
 
     <!-- BLOQUE 1: ECUACIONES -->
     <div class="fragment fade-up"
          style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:16px;">
-      <h3 style="margin:0 0 8px 0;color:#22c55e;">1) Modelo discreto (Euler)</h3>
+      <h3 style="mfont-size: 0.65em;argin:0 0 8px 0;color:#22c55e;">1) Modelo discreto (Euler)</h3>
 
-      <p style="margin:0 0 10px 0;opacity:.85;">
+      <p style="font-size: 0.65em;margin:0 0 10px 0;opacity:.85;">
         La ECU ejecuta el control cada Δt (ej. 20 ms):
       </p>
 
@@ -1635,7 +1635,7 @@
     <!-- BLOQUE 2: SOFTWARE -->
     <div class="fragment fade-up"
          style="background:#0b1326;border:1px solid #23314f;border-radius:16px;padding:16px;">
-      <h3 style="margin:0 0 8px 0;color:#4aa3ff;">2) Implementación en software</h3>
+      <h3 style="font-size: 0.65em;margin:0 0 8px 0;color:#4aa3ff;">2) Implementación en software</h3>
 
       <pre style="margin:0;font-size:0.8rem;line-height:1.45;">
 <code>// Ciclo de control ECU
@@ -1673,7 +1673,7 @@ while (ECU_ON) {
     </div>
   </div>
 
-  <blockquote class="fragment fade-up" style="margin-top:16px;">
+  <blockquote class="fragment fade-up" style="font-size: 0.75em;margin-top:16px;">
     El vehículo no “resuelve ecuaciones”: <b>itera estados</b> en tiempo real.
   </blockquote>
 </section>
@@ -1683,8 +1683,8 @@ while (ECU_ON) {
 <!-- ========================================================= -->
 
  <section data-auto-animate data-background-color="#050a15">
-  <h3 class="fragment fade-down">Software en el vehículo</h3>
-  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+  <h4 class="fragment fade-down">Software en el vehículo</h4>
+  <p class="fragment fade-up" style="font-size: 0.75em;opacity:.85;margin-top:-6px;">
     Sensores → <b>ECU (software)</b> → Actuadores (frenos / volante)
   </p>
 
@@ -1961,7 +1961,7 @@ while (ECU_ON) {
     </svg>
   </div>
 
-  <blockquote class="fragment fade-up" style="margin-top:10px;">
+  <blockquote class="fragment fade-up" style="font-size: 0.75em;margin-top:10px;">
     El <b>software</b> transforma “datos” en “acciones” en tiempo real.
   </blockquote>
 </section>
@@ -1970,11 +1970,11 @@ while (ECU_ON) {
 <!-- para que sirve el sw -->
 <!-- ========================================================= -->
   <section data-background-color="#050a15">
-  <h3 class="fragment fade-down">
+  <h4 class="fragment fade-down">
     ¿Qué hace realmente el software?
-  </h3>
+  </h4>
 
-  <p class="fragment fade-up" style="opacity:.85;margin-top:-6px;">
+  <p class="fragment fade-up" style="font-size: 0.75em;opacity:.85;margin-top:-6px;">
     El software es el <b>puente</b> entre la teoría y el vehículo real
   </p>
 
@@ -1986,7 +1986,7 @@ while (ECU_ON) {
     <div class="fragment fade-right"
          style="background:#0f172a;border:1px solid #23314f;
                 border-radius:16px;padding:16px;">
-      <h4 style="color:#22c55e;margin:0 0 10px 0;">
+      <h4 style="font-size: 0.75em;color:#22c55e;margin:0 0 10px 0;">
         El software se encarga de:
       </h4>
       <ul style="line-height:1.6;">
@@ -2001,7 +2001,7 @@ while (ECU_ON) {
     <div class="fragment fade-left"
          style="background:#0b1326;border:1px solid #23314f;
                 border-radius:16px;padding:16px;">
-      <h3 style="color:#ffcc00;margin:0 0 10px 0;">
+      <h3 style="font-size: 0.75em;color:#ffcc00;margin:0 0 10px 0;">
         En la práctica:
       </h3>
       <ul style="line-height:1.6;">
@@ -2014,7 +2014,7 @@ while (ECU_ON) {
     </div>
   </div>
 
-  <blockquote class="fragment fade-up" style="margin-top:18px;">
+  <blockquote class="fragment fade-up" style="font-size: 0.75em;margin-top:18px;">
     Sin software, el control <b>no existe</b>.
   </blockquote>
 </section>
@@ -2023,9 +2023,9 @@ while (ECU_ON) {
 <!-- SCRIPTS -->
 <!-- ========================================================= -->
 <section data-background-color="#050a15">
-  <h2 class="fragment fade-down">
+  <h4 class="fragment fade-down">
     El control mueve el mundo
-  </h2>
+  </h4>
 
   <div class="fragment fade-up"
        style="background:#0f172a;border:1px solid #23314f;
@@ -2059,9 +2059,9 @@ while (ECU_ON) {
 <!-- ========================================================= -->
 
 <section data-background-color="#050a15">
-  <h2 class="fragment fade-down">
+  <h4 class="fragment fade-down">
     Lo que he aprendido en este camino…
-  </h2>
+  </h4>
 
   <div class="fragment fade-up"
        style="background:#0f172a;
@@ -2123,9 +2123,9 @@ while (ECU_ON) {
 <!-- FINAL -->
 <!-- ========================================================= -->
 <section data-background-color="#050a15">
-  <h2 class="fragment fade-down" style="letter-spacing:2px;">
+  <h4 class="fragment fade-down" style="letter-spacing:2px;">
     GRACIAS
-  </h2>
+  </h4>
   <p class="fragment fade-up" style="opacity:.8;margin-top:-6px;">
     Contacto y recursos
   </p>
@@ -2185,7 +2185,7 @@ while (ECU_ON) {
           <div>
             <div style="opacity:.7;font-size:.85rem;">Phone</div>
             <div style="font-size:1.1rem;font-weight:700;">
-              +1 951 635 5612
+              +52 951 635 5612 | +1 5188668174
             </div>
           </div>
         </div>
