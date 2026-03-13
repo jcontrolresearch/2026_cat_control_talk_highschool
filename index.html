@@ -2221,6 +2221,26 @@ while (ECU_ON) {
 <!-- SCRIPTS -->
 <!-- ========================================================= -->
 
+<link rel="stylesheet" href="plugin/math/katex/katex.css">
+
+<script src="dist/reveal.js"></script>
+<script src="plugin/math/math.js"></script>
+
+<script>
+  Reveal.initialize({
+    hash: true,
+    plugins: [ RevealMath.KaTeX ],
+    math: {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "\\[", right: "\\]", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false }
+      ]
+    }
+  });
+</script>
+
 <script src="dist/reveal.js"></script>
 <script>
   Reveal.initialize({
