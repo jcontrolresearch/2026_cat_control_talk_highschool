@@ -1603,20 +1603,92 @@
 <!-- SLIDE 10 -->
 <!-- ========================================================= -->
   <section data-auto-animate data-background-color="#050a15">
+  <style>
+    /* Layout principal */
+    .disc-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr 0.9fr;
+      gap:18px;
+      margin-top:10px;
+      align-items:stretch; /* clave para simetría */
+    }
+
+    /* Tarjetas simétricas */
+    .disc-card{
+      background:#0f172a;
+      border:1px solid #23314f;
+      border-radius:16px;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      min-height: 360px;     /* ajusta si quieres más/menos alto */
+      box-sizing:border-box;
+    }
+    .disc-card.soft { background:#0b1326; }
+
+    .disc-card h3,
+    .disc-card h4{
+      margin:0 0 8px 0;
+      line-height:1.15;
+    }
+
+    /* Área de contenido que “rellena” la tarjeta */
+    .disc-body{ flex:1; }
+
+    /* Ecuaciones: evita que se “coma” el alto */
+    .eq-wrap{
+      font-size:0.95rem;     /* baja un poco para que quepa */
+      line-height:1.5;
+    }
+
+    /* Código: evita que empuje la tarjeta y mete scroll si hace falta */
+    .code-wrap{
+      flex:1;
+      overflow:auto;
+      border-radius:10px;
+    }
+    .code-wrap pre{
+      margin:0;
+      font-size:0.78rem;
+      line-height:1.35;
+    }
+
+    /* Lista: tamaño consistente */
+    .disc-card ul{
+      margin:0;
+      padding-left:18px;
+      line-height:1.55;
+      font-size:0.92rem;
+    }
+
+    /* Mensaje final: que NO se vaya “atrás” */
+    .disc-quote{
+      margin-top:14px;
+      font-size:0.78em;
+      opacity:0.95;
+      padding:10px 14px;
+      background: rgba(255,255,255,0.06);
+      border-left:4px solid rgba(34,197,94,0.9);
+      border-radius:10px;
+    }
+
+    /* Opcional: si tu tema recorta, esto ayuda */
+    .reveal section{ overflow: visible; }
+  </style>
+
   <h4 data-id="discTitle">Del modelo al software: control en tiempo discreto</h4>
 
-  <div style="display:grid;grid-template-columns:1.2fr 1fr 0.9fr;gap:18px;margin-top:10px;align-items:start;">
+  <div class="disc-grid">
 
-    <!-- BLOQUE 1: ECUACIONES -->
-    <div class="fragment fade-up"
-         style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:16px;">
-      <h4 style="mfont-size: 0.55em;margin:0 0 8px 0;color:#22c55e;">1) Modelo discreto (Euler)</h4>
+    <!-- BLOQUE 1 -->
+    <div class="fragment fade-up disc-card">
+      <h4 style="font-size:0.55em;color:#22c55e;">1) Modelo discreto (Euler)</h4>
 
-      <p style="font-size: 0.65em;margin:0 0 10px 0;opacity:.85;">
+      <p style="font-size:0.65em;margin:0 0 10px 0;opacity:.85;">
         La ECU ejecuta el control cada Δt (ej. 20 ms):
       </p>
 
-      <div style="font-size:1.05rem;line-height:1.6;">
+      <div class="disc-body eq-wrap">
         \[
           v_{k+1}=v_k+\Delta t\,a_k
         \]
@@ -1632,13 +1704,12 @@
       </div>
     </div>
 
-    <!-- BLOQUE 2: SOFTWARE -->
-    <div class="fragment fade-up"
-         style="background:#0b1326;border:1px solid #23314f;border-radius:16px;padding:16px;">
-      <h3 style="font-size: 0.75em;margin:0 0 8px 0;color:#4aa3ff;">2) Implementación en software</h3>
+    <!-- BLOQUE 2 -->
+    <div class="fragment fade-up disc-card soft">
+      <h3 style="font-size:0.75em;color:#4aa3ff;">2) Implementación en software</h3>
 
-      <pre style="margin:0;font-size:0.8rem;line-height:1.45;">
-<code>// Ciclo de control ECU
+      <div class="disc-body code-wrap">
+        <pre><code>// Ciclo de control ECU
 while (ECU_ON) {
   // Sensores
   x, y, psi, v = read_state();
@@ -1653,27 +1724,28 @@ while (ECU_ON) {
 
   // Actuadores
   send_steering(delta);
-}
-</code>
-      </pre>
+}</code></pre>
+      </div>
     </div>
 
-    <!-- BLOQUE 3: TIEMPO REAL -->
-    <div class="fragment fade-up"
-         style="background:#0f172a;border:1px solid #23314f;border-radius:16px;padding:16px;">
-      <h3 style="font-size: 0.75em;margin:0 0 8px 0;color:#ffcc00;">3) Tiempo real</h3>
+    <!-- BLOQUE 3 -->
+    <div class="fragment fade-up disc-card">
+      <h3 style="font-size:0.75em;color:#ffcc00;">3) Tiempo real</h3>
 
-      <ul style="margin:0;padding-left:18px;line-height:1.6;font-size:0.95rem;">
-        <li>Periodo fijo: <b>Δt = 10–50 ms</b></li>
-        <li>Ejecuta en tarea <b>determinística</b></li>
-        <li>Lectura → control → actuador</li>
-        <li>Errores se acumulan si Δt es grande</li>
-        <li>Base de simulación y ECU real</li>
-      </ul>
+      <div class="disc-body">
+        <ul>
+          <li>Periodo fijo: <b>Δt = 10–50 ms</b></li>
+          <li>Ejecuta en tarea <b>determinística</b></li>
+          <li>Lectura → control → actuador</li>
+          <li>Errores se acumulan si Δt es grande</li>
+          <li>Base de simulación y ECU real</li>
+        </ul>
+      </div>
     </div>
+
   </div>
 
-  <blockquote class="fragment fade-up" style="font-size: 0.75em;margin-top:16px;">
+  <blockquote class="fragment fade-up disc-quote">
     El vehículo no “resuelve ecuaciones”: <b>itera estados</b> en tiempo real.
   </blockquote>
 </section>
