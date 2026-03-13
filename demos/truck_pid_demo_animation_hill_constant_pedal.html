@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Demo Control PID - Truck Speed (Offline)</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121826;
+      --panel2:#0f172a;
+      --text:#e5e7eb;
+      --muted:#a3adc2;
+      --accent:#ffcc00;
+      --accent2:#ffd84d;
+      --good:#36d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --grid:rgba(255,255,255,0.07);
+      --line:rgba(255,255,255,0.18);
+      --border:rgba(255,255,255,0.10);
+      --shadow:rgba(0,0,0,0.35);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(255,204,0,0.12), transparent 60%),
+        linear-gradient(180deg, #06080c, var(--bg));
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", sans-serif;
+    }
+
+    header{
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+      background:rgba(18,24,38,0.72);
+      backdrop-filter:blur(10px);
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    header h1{
+      margin:0;
+      font-size:15px;
+      font-weight:800;
+      letter-spacing:0.3px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:2px 10px;
+      border-radius:999px;
+      background:rgba(255,204,0,0.14);
+      border:1px solid rgba(255,204,0,0.35);
+      color:var(--accent2);
+      font-size:11px;
+      font-weight:800;
+    }
+    header p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .wrap{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:16px;
+      padding:16px;
+      max-width:1280px;
+      margin:0 auto;
+    }
+    @media (max-width: 1000px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background:rgba(18,24,38,0.75);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      box-shadow:0 10px 30px var(--shadow);
+    }
+
+    .controls label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 6px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    input[type="range"]{ width:100%; accent-color:var(--accent); }
+    input[type="number"], select{
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(8,10,18,0.65);
+      color:var(--text);
+      outline:none;
+    }
+    input[type="number"]:focus, select:focus{
+      border-color:rgba(255,204,0,0.55);
+      box-shadow:0 0 0 3px rgba(255,204,0,0.10);
+    }
+
+    button{
+      width:100%;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,204,0,0.40);
+      background: linear-gradient(180deg, rgba(255,204,0,0.45), rgba(255,204,0,0.18));
+      color:#111827;
+      font-weight:900;
+      cursor:pointer;
+    }
+    button:hover{
+      border-color:rgba(255,204,0,0.70);
+      filter:brightness(1.03);
+    }
+    .btn2{
+      background:rgba(255,255,255,0.06);
+      border:1px solid var(--border);
+      color:var(--text);
+      font-weight:800;
+    }
+    .btn2:hover{
+      border-color:rgba(255,255,255,0.22);
+      filter:none;
+    }
+
+    .kpi{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi .box{
+      padding:10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(8,10,18,0.45);
+    }
+    .kpi .val{
+      font-size:18px;
+      font-weight:900;
+      margin-top:4px;
+      letter-spacing:0.2px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .tag{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.05);
+      font-size:11px;
+      color:var(--muted);
+      margin-right:6px;
+    }
+
+    /* ---------- NEW: visualization layout ---------- */
+    .vizGrid{
+      display:grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    @media (max-width: 900px){
+      .vizGrid{ grid-template-columns: 1fr; }
+    }
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .vizCanvas{
+      width:100%;
+      height:250px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(8,10,18,0.45);
+      display:block;
+    }
+
+    canvas#cv{
+      width:100%;
+      height:560px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(8,10,18,0.45);
+      display:block;
+    }
+
+    .footnote{
+      padding:0 16px 18px;
+      max-width:1280px;
+      margin:0 auto;
+      color:var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>
+    Demo Offline — Control de Velocidad (Truck) con P/PI/PID + Saturación + “Protección térmica”
+    <span class="pill">SIN INTERNET</span>
+  </h1>
+  <p>Modelo didáctico para enseñar feedback, disturbios, límites físicos, y efectos de un tren motriz simple (no representa un sistema real).</p>
+</header>
+
+<div class="wrap">
+  <div class="card controls">
+    <div class="row">
+      <div>
+        <label>Modo de control</label>
+        <select id="mode">
+          <option value="none">Sin control (open-loop)</option>
+          <option value="p">P</option>
+          <option value="pi">PI</option>
+          <option value="pid" selected>PID</option>
+        </select>
+      </div>
+      <div>
+        <label>Disturbio: “pendiente/carga”</label>
+        <select id="dist">
+          <option value="off">Off</option>
+          <option value="step" selected>Step (8s–14s fuerte)</option>
+          <option value="wave">Onda (cambios suaves)</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Velocidad objetivo (m/s)</label>
+    <input id="target" type="range" min="0" max="22" value="10" step="0.5">
+    <div class="row">
+      <div class="muted">Target: <span id="targetVal"></span></div>
+      <div class="muted">Tip: usa “Step a 14 m/s” para un cambio de consigna</div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Kp</label>
+        <input id="kp" type="number" min="0" max="5" step="0.05" value="0.9">
+      </div>
+      <div>
+        <label>Ki</label>
+        <input id="ki" type="number" min="0" max="2" step="0.01" value="0.35">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Kd</label>
+        <input id="kd" type="number" min="0" max="1" step="0.01" value="0.06">
+      </div>
+      <div>
+        <label>Límite base |u| (driver/ECU)</label>
+        <input id="ulim" type="number" min="0.2" max="1.2" step="0.05" value="1.0">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Protección térmica</label>
+        <select id="prot">
+          <option value="on" selected>On (reduce límite si temp sube)</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+      <div>
+        <label>Tiempo de simulación (s)</label>
+        <input id="horizon" type="number" min="10" max="60" step="5" value="25">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Gearbox automático</label>
+        <select id="gearbox">
+          <option value="on" selected>On</option>
+          <option value="off">Off (fija en 3ra)</option>
+        </select>
+      </div>
+      <div>
+        <label>Shift agresivo</label>
+        <select id="shiftStyle">
+          <option value="normal" selected>Normal</option>
+          <option value="sport">Sport (sube más alto)</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="run">▶ Ejecutar / Reiniciar</button>
+    <button class="btn2" id="pause">⏸ Pausar</button>
+    <button class="btn2" id="step14">⚡ Step a 14 m/s</button>
+
+    <div class="kpi">
+      <div class="box">
+        <div class="muted">Velocidad actual</div>
+        <div class="val" id="vNow">—</div>
+      </div>
+      <div class="box">
+        <div class="muted">Temp (ficticia)</div>
+        <div class="val" id="tNow">—</div>
+      </div>
+      <div class="box">
+        <div class="muted">Comando u (driver)</div>
+        <div class="val" id="uNow">—</div>
+      </div>
+      <div class="box">
+        <div class="muted">Gear / RPM</div>
+        <div class="val" id="grNow">—</div>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:10px">
+      <span class="tag">Feedback</span>
+      <span class="tag">Saturación</span>
+      <span class="tag">Disturbios</span>
+      <span class="tag">Gearbox</span>
+      <span class="tag">Thermal</span>
+
+      <div style="margin-top:8px">
+        Qué observar:
+        <ul>
+          <li>Overshoot / settling al cambiar consigna</li>
+          <li>Cómo la pendiente cambia la velocidad y el throttle</li>
+          <li>Cambios de marcha: RPM cae/sube y afecta aceleración</li>
+          <li>Protección térmica reduce límite y se “siente” en el control</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- NEW: top view + hill + gauges -->
+    <div class="vizGrid">
+      <div class="stack">
+        <canvas id="simTop" class="vizCanvas"></canvas>
+        <canvas id="simHill" class="vizCanvas"></canvas>
+      </div>
+      <div class="stack">
+        <canvas id="gaugeSpeed" class="vizCanvas"></canvas>
+        <canvas id="gaugeRPM" class="vizCanvas"></canvas>
+      </div>
+    </div>
+
+    <canvas id="cv"></canvas>
+  </div>
+</div>
+
+<div class="footnote">
+  Nota: el modelo del tren motriz, la temperatura y la pendiente son didácticos. Funciona 100% offline.
+</div>
+
+<script>
+(() => {
+  // ---------- UI ----------
+  const $ = (id) => document.getElementById(id);
+  const modeEl = $("mode"), distEl = $("dist"), targetEl = $("target");
+  const kpEl = $("kp"), kiEl = $("ki"), kdEl = $("kd"), ulimEl = $("ulim");
+  const protEl = $("prot"), horizonEl = $("horizon");
+  const gbEl = $("gearbox"), shiftStyleEl = $("shiftStyle");
+  const runBtn = $("run"), pauseBtn = $("pause"), stepBtn = $("step14");
+  const targetVal = $("targetVal");
+  const vNow = $("vNow"), tNow = $("tNow"), uNow = $("uNow"), grNow = $("grNow");
+
+  // ---------- Simulation ----------
+  const dt = 0.02;  // 50 Hz
+  let horizon = 25;
+  let running = false;
+
+  // Core states
+  let t = 0, v = 0, temp = 40, u = 0;
+  let integ = 0, prevE = 0;
+
+  // Motion states for visuals
+  let s = 0;        // distance traveled (m)
+  let z = 0;        // elevation (m) for hill view
+  let prevV = 0;    // for decel/brake lights
+
+  // Buffers for plot
+  const buf = { t: [], r: [], v: [], u: [], temp: [], grade: [], ulim: [] };
+
+  // ---------- Gearbox model (simple) ----------
+  // Ratios roughly "truck-ish". You can tweak.
+  const gears = [0, 5.4, 3.3, 2.1, 1.4, 1.0, 0.8]; // index 1..6
+  const finalDrive = 3.7;
+  const wheelR = 0.45;   // m
+  const eta = 0.88;      // drivetrain efficiency
+
+  // "Engine" envelope
+  const rpmIdle = 800;
+  const rpmRed  = 3200;
+  const rpmMaxT = 1600;  // peak torque around here
+  const baseTorque = 1200; // N·m (didactic)
+  const brakeForceMax = 12000; // N (didactic)
+
+  let gear = 3; // start in 3rd
+  let rpm = rpmIdle;
+
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+
+  // Convert speed -> engine rpm for current gear
+  function rpmFromSpeed(v, gearIdx){
+    const wWheel = v / wheelR; // rad/s
+    const ratio = gears[gearIdx] * finalDrive;
+    const wEng = wWheel * ratio; // rad/s
+    const r = wEng * 60 / (2*Math.PI);
+    // enforce idle when stopped
+    return Math.max(rpmIdle, r);
+  }
+
+  // Very simple torque curve (normalized bell around rpmMaxT)
+  function torqueCurve(r){
+    const x = (r - rpmMaxT) / 900;
+    const bell = Math.exp(-x*x); // 0..1
+    // keep some torque near idle
+    return 0.55 + 0.55*bell; // ~0.55..1.1
+  }
+
+  function autoShift(){
+    if (gbEl.value !== "on") { gear = 3; return; }
+
+    const sport = shiftStyleEl.value === "sport";
+    const up = sport ? 2700 : 2400;
+    const dn = sport ? 1200 : 1100;
+
+    // protect at high rpm
+    if (rpm > rpmRed - 80 && gear < 6) gear++;
+    else if (rpm > up && gear < 6) gear++;
+    else if (rpm < dn && gear > 1) gear--;
+  }
+
+  // ---------- Disturbance / grade profile ----------
+  // grade is "load proxy" ~0..0.8 (bigger = harder uphill/cargo)
+  function gradeProfile(time){
+    const dist = distEl.value;
+    if (dist === "off") return 0;
+    if (dist === "step") {
+      if (time >= 8 && time < 14) return 0.8;
+      if (time >= 18) return 0.3;
+      return 0;
+    }
+    if (dist === "wave") {
+      return 0.35 + 0.25 * Math.sin(time * 0.6);
+    }
+    return 0;
+  }
+
+  // ---------- KPIs ----------
+  function updateKPIs(currUlim){
+    vNow.textContent  = v.toFixed(2) + " m/s";
+    tNow.textContent  = temp.toFixed(1) + " °C";
+    uNow.textContent  = u.toFixed(2) + "  (lim " + currUlim.toFixed(2) + ")";
+    grNow.textContent = `${gear}ª / ${Math.round(rpm)} rpm`;
+  }
+
+  // ---------- Reset ----------
+  function reset(){
+    horizon = +horizonEl.value || 25;
+    t = 0; v = 0; prevV = 0; s = 0; z = 0;
+    temp = 40; u = 0;
+    integ = 0; prevE = 0;
+    rpm = rpmIdle;
+    gear = (gbEl.value === "on") ? 3 : 3;
+
+    for (const k in buf) buf[k] = [];
+    pauseBtn.textContent = "⏸ Pausar";
+
+    // terrain buffer reset
+    terrainPts.length = 0;
+    initTerrain();
+  }
+
+  // ---------- Controller step + drivetrain + plant ----------
+  // Plant now uses "force-ish" model so gears matter.
+  // Still didactic: not a full vehicle model, but visually believable.
+  const mass = 9500;    // kg (didactic)
+  const CdA = 6.0;      // drag-ish proxy
+  const roll = 1400;    // rolling resistance proxy N
+  const slopeScale = 0.15; // convert "grade proxy" -> slope force fraction
+
+  function step(){
+    const r = +targetEl.value;
+
+    const Kp = +kpEl.value, Ki = +kiEl.value, Kd = +kdEl.value;
+    const ulimBase = +ulimEl.value;
+
+    const grade = gradeProfile(t); // 0..0.8-ish
+
+    const e = r - v;
+
+    // thermal protection reduces u-limit
+    let currUlim = ulimBase;
+    if (protEl.value === "on") {
+      if (temp > 95) currUlim = Math.max(0.35, ulimBase - 0.01*(temp - 95));
+    }
+
+    // controller output u (driver command: throttle/brake proxy)
+    const mode = modeEl.value;
+    
+	if (mode === "none") {
+	  // Open-loop real: "pedal casi fijo" (sin usar error e)
+	  // Un pequeño perfil para que arranque y luego se quede en un valor constante.
+	  const u0 = 0.35;     // throttle base (ajusta 0.25–0.45)
+	  const uKick = 0.18;  // empujón inicial para arrancar
+	  const kickTime = 2.0;
+
+	  // Throttle "manual": al inicio un poco más, luego se queda fijo
+	  u = (t < kickTime) ? (u0 + uKick) : u0;
+
+	  // Opcional: el conductor suelta un poco cuando pasa del target (sin feedback fino)
+	  // (esto NO usa e; solo compara con r de forma burda)
+	  if (v > r + 1.0) u = 0.10;
+
+	  // Nota: sin freno automático en open-loop (u nunca negativo)
+	} else if (mode === "p") {
+      u = Kp * e;
+    } else if (mode === "pi") {
+      integ += e * dt;
+      u = Kp * e + Ki * integ;
+    } else if (mode === "pid") {
+      integ += e * dt;
+      const deriv = (e - prevE) / dt;
+      prevE = e;
+      u = Kp * e + Ki * integ + Kd * deriv;
+    }
+
+    // saturate u
+    u = clamp(u, -currUlim, currUlim);
+
+    // gearbox + rpm based on (current) speed
+    rpm = rpmFromSpeed(v, gear);
+    autoShift();
+    rpm = rpmFromSpeed(v, gear);
+
+    // driver commands:
+    // u>0 throttle; u<0 braking
+    const throttle = clamp(u, 0, 1);
+    const brake    = clamp(-u, 0, 1);
+
+    // engine torque with curve & thermal derate (soft)
+    const thermalDerate = clamp(1.0 - Math.max(0, (temp - 110))/60, 0.55, 1.0);
+    const Te = baseTorque * torqueCurve(rpm) * throttle * thermalDerate;
+
+    // drive force at wheels
+    const ratio = gears[gear] * finalDrive;
+    const Tw = Te * ratio * eta;
+    const Fdrive = Tw / wheelR;
+
+    // brake force
+    const Fbrake = brakeForceMax * brake;
+
+    // resistances
+    const Fdrag = CdA * v * v; // simple quadratic
+    const Froll = (v > 0.2) ? roll : 0; // avoid weirdness at standstill
+
+    // grade force: use proxy (bigger grade = more uphill load)
+    const Fslope = mass * 9.81 * (grade * slopeScale);
+
+    // net acceleration
+    const Fnet = Fdrive - Fbrake - Fdrag - Froll - Fslope;
+    const a = Fnet / mass;
+
+    // integrate
+    prevV = v;
+    v += a * dt;
+    if (v < 0) v = 0;
+
+    // distance & elevation
+    s += v * dt;
+
+    // "hill climb" elevation integrates grade over distance
+    // grade proxy -> slope angle-ish -> dz/ds
+    const dzds = grade * 0.035;   // tune: meters rise per meter traveled (small)
+    z += dzds * (v * dt);
+
+    // fictitious temp dynamics: driven by throttle + load + braking
+    const tempDot = 10.0*throttle + 7.0*grade + 4.0*brake - 0.10*(temp - 40);
+    temp += tempDot * dt;
+
+    // record for plots (still similar)
+    buf.t.push(t);
+    buf.r.push(r);
+    buf.v.push(v);
+    buf.u.push(u);
+    buf.temp.push(temp);
+    buf.grade.push(grade);
+    buf.ulim.push(currUlim);
+
+    t += dt;
+    updateKPIs(currUlim);
+  }
+
+  // ---------- Canvas helpers ----------
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function setupHiDPI(canvas, ctx){
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const rect = canvas.getBoundingClientRect();
+    const W = Math.round(rect.width * dpr);
+    const H = Math.round(rect.height * dpr);
+    if (canvas.width !== W || canvas.height !== H){
+      canvas.width = W;
+      canvas.height = H;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { w: rect.width, h: rect.height, dpr };
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  // ---------- Top view (with brake lights + temp glow) ----------
+  const simTop = $("simTop");
+  const topCtx = simTop.getContext("2d");
+
+  function renderTop(){
+    const { w, h } = setupHiDPI(simTop, topCtx);
+    topCtx.clearRect(0,0,w,h);
+
+    const pad = 16;
+    const roadW = Math.min(520, w - pad*2);
+    const roadX = (w - roadW)/2;
+    const roadY = pad;
+    const roadH = h - pad*2;
+
+    const grade = gradeProfile(t);
+    const gradeTint = clamp(grade, 0, 0.85);
+
+    // road base
+    topCtx.fillStyle = "rgba(6,8,14,0.92)";
+    roundRect(topCtx, roadX, roadY, roadW, roadH, 18);
+    topCtx.fill();
+
+    // grade tint (harder load = warmer)
+    topCtx.fillStyle = `rgba(251,113,133,${0.10*gradeTint})`;
+    roundRect(topCtx, roadX, roadY, roadW, roadH, 18);
+    topCtx.fill();
+
+    // border
+    topCtx.strokeStyle = cssVar("--border");
+    topCtx.lineWidth = 1;
+    roundRect(topCtx, roadX, roadY, roadW, roadH, 18);
+    topCtx.stroke();
+
+    // center dashed line, scroll with distance
+    const dashLen = 28, gapLen = 22;
+    const pattern = dashLen + gapLen;
+    const pxPerMeter = 14;
+    const scroll = (s * pxPerMeter) % pattern;
+
+    topCtx.strokeStyle = "rgba(255,204,0,0.75)";
+    topCtx.lineWidth = 4;
+    topCtx.lineCap = "round";
+    topCtx.setLineDash([dashLen, gapLen]);
+    topCtx.lineDashOffset = -scroll;
+    topCtx.beginPath();
+    topCtx.moveTo(roadX + roadW/2, roadY + 14);
+    topCtx.lineTo(roadX + roadW/2, roadY + roadH - 14);
+    topCtx.stroke();
+    topCtx.setLineDash([]);
+
+    // lane edges
+    topCtx.strokeStyle = "rgba(255,255,255,0.20)";
+    topCtx.lineWidth = 2;
+    topCtx.beginPath();
+    topCtx.moveTo(roadX + 34, roadY + 18);
+    topCtx.lineTo(roadX + 34, roadY + roadH - 18);
+    topCtx.moveTo(roadX + roadW - 34, roadY + 18);
+    topCtx.lineTo(roadX + roadW - 34, roadY + roadH - 18);
+    topCtx.stroke();
+
+    // truck position (fixed, road moves)
+    const truckY = roadY + roadH * 0.70;
+    const wobble = 8 * Math.sin(s * 0.25);
+    const truckX = roadX + roadW/2 + wobble;
+
+    // temperature glow intensity
+    const heat = clamp((temp - 75) / 55, 0, 1);
+    if (heat > 0){
+      topCtx.save();
+      topCtx.globalAlpha = 0.55 * heat;
+      topCtx.shadowColor = `rgba(251,113,133,${0.9*heat})`;
+      topCtx.shadowBlur = 28 + 40*heat;
+      topCtx.fillStyle = "rgba(251,113,133,0.15)";
+      roundRect(topCtx, truckX - 50, truckY - 80, 100, 160, 18);
+      topCtx.fill();
+      topCtx.restore();
+    }
+
+    // truck body
+    const bodyW = 76, bodyH = 126, cabH = 36;
+
+    // shadow
+    topCtx.fillStyle = "rgba(0,0,0,0.35)";
+    roundRect(topCtx, truckX - bodyW/2 + 4, truckY - bodyH/2 + 6, bodyW, bodyH, 14);
+    topCtx.fill();
+
+    // body
+    topCtx.fillStyle = "rgba(255,216,77,0.95)";
+    roundRect(topCtx, truckX - bodyW/2, truckY - bodyH/2, bodyW, bodyH, 14);
+    topCtx.fill();
+
+    // cab
+    topCtx.fillStyle = "rgba(17,24,39,0.85)";
+    roundRect(topCtx, truckX - bodyW/2 + 8, truckY - bodyH/2 + 10, bodyW - 16, cabH, 10);
+    topCtx.fill();
+
+    // windshield highlight
+    topCtx.fillStyle = "rgba(34,211,238,0.25)";
+    roundRect(topCtx, truckX - bodyW/2 + 14, truckY - bodyH/2 + 14, bodyW - 28, cabH - 10, 8);
+    topCtx.fill();
+
+    // wheels
+    topCtx.fillStyle = "rgba(0,0,0,0.78)";
+    topCtx.fillRect(truckX - bodyW/2 - 10, truckY - bodyH/2 + 24, 10, 22);
+    topCtx.fillRect(truckX + bodyW/2,      truckY - bodyH/2 + 24, 10, 22);
+    topCtx.fillRect(truckX - bodyW/2 - 10, truckY + bodyH/2 - 46, 10, 22);
+    topCtx.fillRect(truckX + bodyW/2,      truckY + bodyH/2 - 46, 10, 22);
+
+    // brake lights condition: u<0 OR strong decel
+    const decel = (v - prevV) / dt; // m/s^2
+    const braking = (u < -0.05) || (decel < -0.9);
+
+    if (braking){
+      topCtx.save();
+      topCtx.fillStyle = "rgba(251,113,133,0.95)";
+      // rear lights near bottom of body
+      topCtx.fillRect(truckX - 26, truckY + bodyH/2 - 18, 16, 8);
+      topCtx.fillRect(truckX + 10, truckY + bodyH/2 - 18, 16, 8);
+      // glow
+      topCtx.globalAlpha = 0.65;
+      topCtx.shadowColor = "rgba(251,113,133,0.95)";
+      topCtx.shadowBlur = 18;
+      topCtx.fillRect(truckX - 28, truckY + bodyH/2 - 20, 20, 12);
+      topCtx.fillRect(truckX + 8,  truckY + bodyH/2 - 20, 20, 12);
+      topCtx.restore();
+    }
+
+    // side bar for throttle/brake visualization
+    const barX = roadX + roadW + 22;
+    const barY = roadY + 24;
+    const barH = roadH - 48;
+    const barW = 16;
+
+    topCtx.fillStyle = "rgba(255,255,255,0.06)";
+    roundRect(topCtx, barX, barY, barW, barH, 10);
+    topCtx.fill();
+
+    topCtx.strokeStyle = "rgba(255,255,255,0.12)";
+    topCtx.beginPath();
+    topCtx.moveTo(barX, barY + barH/2);
+    topCtx.lineTo(barX + barW, barY + barH/2);
+    topCtx.stroke();
+
+    const uNorm = clamp(u / 1.2, -1, 1);
+    const mid = barY + barH/2;
+    const amp = (barH/2 - 8) * Math.abs(uNorm);
+
+    if (uNorm >= 0){
+      topCtx.fillStyle = "rgba(54,211,153,0.85)";
+      roundRect(topCtx, barX + 3, mid - amp, barW - 6, amp, 8);
+      topCtx.fill();
+    } else {
+      topCtx.fillStyle = "rgba(251,113,133,0.85)";
+      roundRect(topCtx, barX + 3, mid, barW - 6, amp, 8);
+      topCtx.fill();
+    }
+
+    // HUD text
+    topCtx.fillStyle = cssVar("--text");
+    topCtx.font = "800 13px ui-sans-serif, system-ui, Segoe UI, Arial";
+    topCtx.fillText("Top View (brake lights + thermal glow)", pad, 22);
+
+    topCtx.fillStyle = cssVar("--muted");
+    topCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    topCtx.fillText(`Distancia: ${s.toFixed(1)} m`, pad, 44);
+    topCtx.fillText(`Carga/pendiente: ${grade.toFixed(2)} | decel: ${decel.toFixed(2)} m/s²`, pad, 62);
+    topCtx.fillText(`u: ${u.toFixed(2)} | Gear: ${gear}ª | RPM: ${Math.round(rpm)}`, pad, 80);
+
+    topCtx.fillStyle = cssVar("--accent2");
+    topCtx.font = "900 16px ui-sans-serif, system-ui, Segoe UI, Arial";
+    topCtx.fillText(`v = ${v.toFixed(2)} m/s`, pad, h - 18);
+  }
+
+  // ---------- Hill side-view (terrain scroll + truck rides hill) ----------
+  const simHill = $("simHill");
+  const hillCtx = simHill.getContext("2d");
+
+  // Terrain points (distance, elevation) for the visible window
+  const terrainPts = [];
+  const sampleDs = 2.0;  // meters between samples
+  let lastSampleS = 0;
+
+  function initTerrain(){
+    lastSampleS = 0;
+    terrainPts.push({ s: 0, z: 0 });
+  }
+
+  function updateTerrain(){
+    // sample terrain as we move forward
+    while (s - lastSampleS >= sampleDs){
+      lastSampleS += sampleDs;
+
+      // add some natural undulation + the "grade-integrated" elevation
+      const wobble = 0.25 * Math.sin(lastSampleS * 0.08) + 0.12 * Math.sin(lastSampleS * 0.22);
+      const zz = z + wobble;
+      terrainPts.push({ s: lastSampleS, z: zz });
+    }
+
+    // keep only points around visible window
+    const windowM = 120; // meters shown
+    while (terrainPts.length > 2 && terrainPts[1].s < s - windowM){
+      terrainPts.shift();
+    }
+  }
+
+  function renderHill(){
+    const { w, h } = setupHiDPI(simHill, hillCtx);
+    hillCtx.clearRect(0,0,w,h);
+
+    // panel background
+    hillCtx.save();
+    hillCtx.fillStyle = "rgba(8,10,18,0.28)";
+    roundRect(hillCtx, 12, 12, w-24, h-24, 18);
+    hillCtx.fill();
+    hillCtx.strokeStyle = cssVar("--border");
+    hillCtx.lineWidth = 1;
+    roundRect(hillCtx, 12, 12, w-24, h-24, 18);
+    hillCtx.stroke();
+
+    // sky gradient
+    const sky = hillCtx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, "rgba(34,211,238,0.10)");
+    sky.addColorStop(1, "rgba(255,255,255,0.00)");
+    hillCtx.fillStyle = sky;
+    hillCtx.fillRect(20, 20, w-40, h-40);
+
+    // terrain
+    const pad = 18;
+    const baseY = h * 0.74;
+    const pxPerMeterX = 7.0;
+    const pxPerMeterZ = 22.0;
+
+    // update terrain buffer
+    updateTerrain();
+
+    // draw ground fill
+    hillCtx.beginPath();
+    const cx = w * 0.52; // truck centered
+    for (let i=0; i<terrainPts.length; i++){
+      const p = terrainPts[i];
+      const x = cx + (p.s - s) * pxPerMeterX;
+      const y = baseY - (p.z) * pxPerMeterZ;
+
+      if (i === 0) hillCtx.moveTo(x, y);
+      else hillCtx.lineTo(x, y);
+    }
+
+    // close polygon to bottom
+    hillCtx.lineTo(cx + (terrainPts[terrainPts.length-1].s - s) * pxPerMeterX, h - pad);
+    hillCtx.lineTo(cx + (terrainPts[0].s - s) * pxPerMeterX, h - pad);
+    hillCtx.closePath();
+
+    const grade = gradeProfile(t);
+    const heat = clamp((temp - 75)/55, 0, 1);
+
+    // ground color shifts warmer with load
+    hillCtx.fillStyle = `rgba(16, 24, 39, 0.80)`;
+    hillCtx.fill();
+
+    // highlight
+    hillCtx.strokeStyle = "rgba(255,255,255,0.18)";
+    hillCtx.lineWidth = 2;
+    hillCtx.stroke();
+
+    // draw a "danger heat haze" overlay when hot
+    if (heat > 0){
+      hillCtx.save();
+      hillCtx.globalAlpha = 0.22 * heat;
+      hillCtx.fillStyle = "rgba(251,113,133,0.70)";
+      hillCtx.fillRect(20, 20, w-40, h-40);
+      hillCtx.restore();
+    }
+
+    // place truck on terrain at center x (s)
+    // find terrain height at s (interpolate between points around s)
+    let yTruck = baseY;
+    let slopeAng = 0;
+
+    for (let i=1; i<terrainPts.length; i++){
+      if (terrainPts[i].s >= s){
+        const p0 = terrainPts[i-1], p1 = terrainPts[i];
+        const alpha = (s - p0.s) / Math.max(1e-6, (p1.s - p0.s));
+        const zz = p0.z + alpha*(p1.z - p0.z);
+        yTruck = baseY - zz * pxPerMeterZ;
+
+        // slope angle using local derivative
+        const dz = (p1.z - p0.z);
+        const ds = (p1.s - p0.s);
+        slopeAng = Math.atan2(dz, ds); // radians
+        break;
+      }
+    }
+
+    // truck drawing (side view)
+    const tx = cx;
+    const ty = yTruck - 18;
+
+    // thermal glow around truck
+    if (heat > 0){
+      hillCtx.save();
+      hillCtx.globalAlpha = 0.45 * heat;
+      hillCtx.shadowColor = `rgba(251,113,133,${0.9*heat})`;
+      hillCtx.shadowBlur = 26 + 34*heat;
+      hillCtx.fillStyle = "rgba(251,113,133,0.10)";
+      hillCtx.beginPath();
+      hillCtx.ellipse(tx, ty-10, 70, 38, 0, 0, Math.PI*2);
+      hillCtx.fill();
+      hillCtx.restore();
+    }
+
+    hillCtx.save();
+    hillCtx.translate(tx, ty);
+    hillCtx.rotate(-slopeAng); // rotate truck opposite to slope so it looks aligned
+
+    // shadow
+    hillCtx.fillStyle = "rgba(0,0,0,0.35)";
+    hillCtx.beginPath();
+    hillCtx.ellipse(6, 16, 56, 12, 0, 0, Math.PI*2);
+    hillCtx.fill();
+
+    // trailer/body
+    hillCtx.fillStyle = "rgba(255,216,77,0.95)";
+    roundRect(hillCtx, -60, -18, 120, 32, 10);
+    hillCtx.fill();
+
+    // cab
+    hillCtx.fillStyle = "rgba(17,24,39,0.85)";
+    roundRect(hillCtx, 20, -30, 40, 44, 10);
+    hillCtx.fill();
+
+    // window
+    hillCtx.fillStyle = "rgba(34,211,238,0.25)";
+    roundRect(hillCtx, 26, -24, 26, 16, 6);
+    hillCtx.fill();
+
+    // wheels
+    hillCtx.fillStyle = "rgba(0,0,0,0.85)";
+    hillCtx.beginPath(); hillCtx.arc(-30, 16, 10, 0, Math.PI*2); hillCtx.fill();
+    hillCtx.beginPath(); hillCtx.arc( 20, 16, 10, 0, Math.PI*2); hillCtx.fill();
+    hillCtx.fillStyle = "rgba(255,255,255,0.12)";
+    hillCtx.beginPath(); hillCtx.arc(-30, 16, 4, 0, Math.PI*2); hillCtx.fill();
+    hillCtx.beginPath(); hillCtx.arc( 20, 16, 4, 0, Math.PI*2); hillCtx.fill();
+
+    // brake lights if braking
+    const decel = (v - prevV) / dt;
+    const braking = (u < -0.05) || (decel < -0.9);
+    if (braking){
+      hillCtx.save();
+      hillCtx.fillStyle = "rgba(251,113,133,0.95)";
+      hillCtx.fillRect(-58, -8, 10, 6);
+      hillCtx.fillRect(-58,  2, 10, 6);
+      hillCtx.shadowColor = "rgba(251,113,133,0.95)";
+      hillCtx.shadowBlur = 12;
+      hillCtx.globalAlpha = 0.6;
+      hillCtx.fillRect(-60, -10, 14, 10);
+      hillCtx.restore();
+    }
+
+    hillCtx.restore();
+
+    // HUD
+    hillCtx.fillStyle = cssVar("--text");
+    hillCtx.font = "800 13px ui-sans-serif, system-ui, Segoe UI, Arial";
+    hillCtx.fillText("Side View Hill Climb (slope from grade)", 18, 26);
+
+    hillCtx.fillStyle = cssVar("--muted");
+    hillCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    hillCtx.fillText(`Elevación: ${z.toFixed(2)} m | pendiente proxy: ${grade.toFixed(2)} | slope≈${(slopeAng*180/Math.PI).toFixed(1)}°`, 18, 46);
+    hillCtx.fillText(`Gear: ${gear}ª | RPM: ${Math.round(rpm)} | throttle: ${(Math.max(0,u)).toFixed(2)} | brake: ${(Math.max(0,-u)).toFixed(2)}`, 18, 64);
+
+    // show a small grade bar
+    const gx = 18, gy = h - 30, gw = 180, gh = 10;
+    hillCtx.fillStyle = "rgba(255,255,255,0.06)";
+    roundRect(hillCtx, gx, gy, gw, gh, 6);
+    hillCtx.fill();
+    hillCtx.fillStyle = `rgba(251,113,133,${0.6 + 0.2*grade})`;
+    roundRect(hillCtx, gx, gy, gw*clamp(grade/0.8,0,1), gh, 6);
+    hillCtx.fill();
+
+    hillCtx.restore();
+  }
+
+  // ---------- Gauges ----------
+  const gaugeSpeed = $("gaugeSpeed");
+  const spCtx = gaugeSpeed.getContext("2d");
+  const gaugeRPM = $("gaugeRPM");
+  const rpmCtx = gaugeRPM.getContext("2d");
+
+  function drawGaugeBase(ctx, w, h, title, subtitle, heat){
+    // frame
+    ctx.fillStyle = "rgba(8,10,18,0.35)";
+    roundRect(ctx, 12, 12, w-24, h-24, 18);
+    ctx.fill();
+    ctx.strokeStyle = cssVar("--border");
+    ctx.lineWidth = 1;
+    roundRect(ctx, 12, 12, w-24, h-24, 18);
+    ctx.stroke();
+
+    // heat ring glow
+    if (heat > 0){
+      ctx.save();
+      ctx.globalAlpha = 0.20 * heat;
+      ctx.shadowColor = "rgba(251,113,133,0.9)";
+      ctx.shadowBlur = 28 + 36*heat;
+      ctx.fillStyle = "rgba(251,113,133,0.25)";
+      roundRect(ctx, 12, 12, w-24, h-24, 18);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.fillStyle = cssVar("--text");
+    ctx.font = "900 14px ui-sans-serif, system-ui, Segoe UI, Arial";
+    ctx.fillText(title, 22, 34);
+
+    ctx.fillStyle = cssVar("--muted");
+    ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    ctx.fillText(subtitle, 22, 54);
+  }
+
+  function renderSpeedGauge(){
+    const { w, h } = setupHiDPI(gaugeSpeed, spCtx);
+    spCtx.clearRect(0,0,w,h);
+
+    const heat = clamp((temp - 85)/55, 0, 1);
+    drawGaugeBase(spCtx, w, h, "Speedometer", "m/s (marker = target)", heat);
+
+    const cx = w * 0.55, cy = h * 0.70;
+    const R = Math.min(w, h) * 0.62;
+
+    const vMax = 24;
+    const vNowVal = clamp(v, 0, vMax);
+    const vTgt = clamp(+targetEl.value, 0, vMax);
+
+    const a0 = -Math.PI*3/4;
+    const a1 =  Math.PI*3/4;
+    const ang = (val) => a0 + (val / vMax) * (a1 - a0);
+
+    // track
+    spCtx.lineWidth = 14;
+    spCtx.lineCap = "round";
+    spCtx.strokeStyle = "rgba(255,255,255,0.10)";
+    spCtx.beginPath();
+    spCtx.arc(cx, cy, R, a0, a1);
+    spCtx.stroke();
+
+    // progress
+    spCtx.strokeStyle = cssVar("--accent2");
+    spCtx.beginPath();
+    spCtx.arc(cx, cy, R, a0, ang(vNowVal));
+    spCtx.stroke();
+
+    // ticks
+    spCtx.lineWidth = 2;
+    for (let i=0; i<=12; i++){
+      const val = (i/12)*vMax;
+      const a = ang(val);
+      const r1 = R - 20;
+      const r2 = (i%3===0) ? (R - 44) : (R - 34);
+
+      spCtx.strokeStyle = (i%3===0) ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)";
+      spCtx.beginPath();
+      spCtx.moveTo(cx + Math.cos(a)*r1, cy + Math.sin(a)*r1);
+      spCtx.lineTo(cx + Math.cos(a)*r2, cy + Math.sin(a)*r2);
+      spCtx.stroke();
+
+      if (i%3===0){
+        spCtx.fillStyle = cssVar("--muted");
+        spCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+        const tx = cx + Math.cos(a)*(R - 66);
+        const ty = cy + Math.sin(a)*(R - 66);
+        spCtx.fillText(String(Math.round(val)), tx - 8, ty + 4);
+      }
+    }
+
+    // target marker
+    const at = ang(vTgt);
+    const mx = cx + Math.cos(at)*(R + 2);
+    const my = cy + Math.sin(at)*(R + 2);
+    spCtx.fillStyle = "rgba(34,211,238,0.95)";
+    spCtx.beginPath();
+    spCtx.moveTo(mx, my);
+    spCtx.lineTo(mx + Math.cos(at + 0.25)*14, my + Math.sin(at + 0.25)*14);
+    spCtx.lineTo(mx + Math.cos(at - 0.25)*14, my + Math.sin(at - 0.25)*14);
+    spCtx.closePath();
+    spCtx.fill();
+
+    // needle
+    const an = ang(vNowVal);
+    spCtx.strokeStyle = "rgba(255,255,255,0.90)";
+    spCtx.lineWidth = 3;
+    spCtx.beginPath();
+    spCtx.moveTo(cx, cy);
+    spCtx.lineTo(cx + Math.cos(an)*(R - 62), cy + Math.sin(an)*(R - 62));
+    spCtx.stroke();
+
+    // hub
+    spCtx.fillStyle = "rgba(17,24,39,0.95)";
+    spCtx.beginPath();
+    spCtx.arc(cx, cy, 12, 0, Math.PI*2);
+    spCtx.fill();
+    spCtx.strokeStyle = "rgba(255,255,255,0.20)";
+    spCtx.stroke();
+
+    // numeric
+    const kmh = vNowVal * 3.6;
+    spCtx.fillStyle = cssVar("--accent2");
+    spCtx.font = "900 26px ui-sans-serif, system-ui, Segoe UI, Arial";
+    spCtx.fillText(`${vNowVal.toFixed(1)} m/s`, 22, h - 62);
+
+    spCtx.fillStyle = cssVar("--muted");
+    spCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    spCtx.fillText(`${kmh.toFixed(0)} km/h`, 22, h - 40);
+  }
+
+  function renderRpmGauge(){
+    const { w, h } = setupHiDPI(gaugeRPM, rpmCtx);
+    rpmCtx.clearRect(0,0,w,h);
+
+    const heat = clamp((temp - 85)/55, 0, 1);
+    drawGaugeBase(rpmCtx, w, h, "Engine RPM", "auto gearbox + torque curve", heat);
+
+    const cx = w * 0.55, cy = h * 0.70;
+    const R = Math.min(w, h) * 0.62;
+
+    const rpmMax = rpmRed;
+    const rpmNow = clamp(rpm, rpmIdle, rpmMax);
+
+    const a0 = -Math.PI*3/4;
+    const a1 =  Math.PI*3/4;
+    const ang = (val) => a0 + (val / rpmMax) * (a1 - a0);
+
+    // track
+    rpmCtx.lineWidth = 14;
+    rpmCtx.lineCap = "round";
+    rpmCtx.strokeStyle = "rgba(255,255,255,0.10)";
+    rpmCtx.beginPath();
+    rpmCtx.arc(cx, cy, R, a0, a1);
+    rpmCtx.stroke();
+
+    // green->yellow->red band
+    const band = [
+      { to: 0.65, c:"rgba(54,211,153,0.80)" },
+      { to: 0.85, c:"rgba(251,191,36,0.85)" },
+      { to: 1.00, c:"rgba(251,113,133,0.85)" },
+    ];
+    let prev = a0;
+    for (const seg of band){
+      const aSeg = a0 + seg.to*(a1 - a0);
+      rpmCtx.strokeStyle = seg.c;
+      rpmCtx.beginPath();
+      rpmCtx.arc(cx, cy, R, prev, aSeg);
+      rpmCtx.stroke();
+      prev = aSeg;
+    }
+
+    // overlay progress
+    rpmCtx.strokeStyle = "rgba(255,255,255,0.70)";
+    rpmCtx.lineWidth = 3;
+    rpmCtx.beginPath();
+    rpmCtx.arc(cx, cy, R - 20, a0, ang(rpmNow));
+    rpmCtx.stroke();
+
+    // ticks (every 400 rpm)
+    rpmCtx.lineWidth = 2;
+    for (let val=0; val<=rpmMax; val+=400){
+      const a = ang(val);
+      const major = (val % 800 === 0);
+      const r1 = R - 18;
+      const r2 = major ? (R - 44) : (R - 34);
+
+      rpmCtx.strokeStyle = major ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)";
+      rpmCtx.beginPath();
+      rpmCtx.moveTo(cx + Math.cos(a)*r1, cy + Math.sin(a)*r1);
+      rpmCtx.lineTo(cx + Math.cos(a)*r2, cy + Math.sin(a)*r2);
+      rpmCtx.stroke();
+
+      if (major && val>0){
+        rpmCtx.fillStyle = cssVar("--muted");
+        rpmCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+        const tx = cx + Math.cos(a)*(R - 68);
+        const ty = cy + Math.sin(a)*(R - 68);
+        rpmCtx.fillText(String(Math.round(val/1000))+"k", tx - 10, ty + 4);
+      }
+    }
+
+    // needle
+    const an = ang(rpmNow);
+    rpmCtx.strokeStyle = "rgba(255,255,255,0.92)";
+    rpmCtx.lineWidth = 3;
+    rpmCtx.beginPath();
+    rpmCtx.moveTo(cx, cy);
+    rpmCtx.lineTo(cx + Math.cos(an)*(R - 62), cy + Math.sin(an)*(R - 62));
+    rpmCtx.stroke();
+
+    // hub
+    rpmCtx.fillStyle = "rgba(17,24,39,0.95)";
+    rpmCtx.beginPath();
+    rpmCtx.arc(cx, cy, 12, 0, Math.PI*2);
+    rpmCtx.fill();
+    rpmCtx.strokeStyle = "rgba(255,255,255,0.20)";
+    rpmCtx.stroke();
+
+    // numeric + gear
+    rpmCtx.fillStyle = cssVar("--accent2");
+    rpmCtx.font = "900 26px ui-sans-serif, system-ui, Segoe UI, Arial";
+    rpmCtx.fillText(`${Math.round(rpmNow)} rpm`, 22, h - 62);
+
+    rpmCtx.fillStyle = cssVar("--muted");
+    rpmCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    rpmCtx.fillText(`Gear: ${gear}ª | Final: ${finalDrive} | WheelR: ${wheelR}m`, 22, h - 40);
+  }
+
+  // ---------- Plots (same style, adjusted for responsive sizing) ----------
+  const plotCanvas = $("cv");
+  const plotCtx = plotCanvas.getContext("2d");
+
+  function drawGrid(ctx, x0, y0, w, h, xTicks, yTicks){
+    ctx.save();
+    ctx.strokeStyle = cssVar("--grid");
+    ctx.lineWidth = 1;
+
+    for (let i=0; i<=xTicks; i++){
+      const x = x0 + (w*i)/xTicks;
+      ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y0+h); ctx.stroke();
+    }
+    for (let j=0; j<=yTicks; j++){
+      const y = y0 + (h*j)/yTicks;
+      ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+w,y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function plotSeries(ctx, x, y, xMin, xMax, yMin, yMax, rect, color, dashed=false, width=2){
+    if (x.length < 2) return;
+    const {x0,y0,w,h} = rect;
+    const X = (val) => x0 + ((val-xMin)/(xMax-xMin))*w;
+    const Y = (val) => y0 + h - ((val-yMin)/(yMax-yMin))*h;
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dashed ? [8,6] : []);
+    ctx.beginPath();
+    ctx.moveTo(X(x[0]), Y(y[0]));
+    for (let i=1; i<x.length; i++) ctx.lineTo(X(x[i]), Y(y[i]));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawLabel(ctx, text, x, y, color=cssVar("--muted")){
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function renderPlots(){
+    const rect = plotCanvas.getBoundingClientRect();
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const W = Math.round(rect.width * dpr);
+    const H = Math.round(rect.height * dpr);
+    if (plotCanvas.width !== W || plotCanvas.height !== H){
+      plotCanvas.width = W;
+      plotCanvas.height = H;
+    }
+    plotCtx.setTransform(dpr,0,0,dpr,0,0);
+    plotCtx.clearRect(0,0,rect.width,rect.height);
+
+    const pad = 22;
+    const plotH = (rect.height - pad*2 - 20)/3;
+    const plotW = rect.width - pad*2;
+
+    const r1 = {x0: pad, y0: pad, w: plotW, h: plotH};
+    const r2 = {x0: pad, y0: pad + plotH + 10, w: plotW, h: plotH};
+    const r3 = {x0: pad, y0: pad + 2*(plotH + 10), w: plotW, h: plotH};
+
+    const tMax = Math.max(horizon, 1);
+    const x = buf.t;
+
+    // Velocity
+    drawGrid(plotCtx, r1.x0, r1.y0, r1.w, r1.h, 10, 6);
+    drawLabel(plotCtx, "Velocidad vs Objetivo", r1.x0, r1.y0-6, cssVar("--text"));
+    plotSeries(plotCtx, x, buf.r, 0, tMax, 0, 24, r1, cssVar("--line"), true, 2);
+    plotSeries(plotCtx, x, buf.v, 0, tMax, 0, 24, r1, cssVar("--accent2"), false, 3);
+
+    // u
+    drawGrid(plotCtx, r2.x0, r2.y0, r2.w, r2.h, 10, 6);
+    drawLabel(plotCtx, "Comando u (driver) y límites", r2.x0, r2.y0-6, cssVar("--text"));
+    plotSeries(plotCtx, x, buf.u, 0, tMax, -1.2, 1.2, r2, cssVar("--good"), false, 3);
+    plotSeries(plotCtx, x, buf.ulim, 0, tMax, -1.2, 1.2, r2, cssVar("--bad"), true, 2);
+    plotSeries(plotCtx, x, buf.ulim.map(v=>-v), 0, tMax, -1.2, 1.2, r2, cssVar("--bad"), true, 2);
+
+    // temp + grade (scaled)
+    drawGrid(plotCtx, r3.x0, r3.y0, r3.w, r3.h, 10, 6);
+    drawLabel(plotCtx, "Temperatura (ficticia) + carga (escala)", r3.x0, r3.y0-6, cssVar("--text"));
+    plotSeries(plotCtx, x, buf.temp, 0, tMax, 35, 130, r3, "#e879f9", false, 3);
+    plotSeries(plotCtx, x, buf.grade.map(g => 40 + g*20), 0, tMax, 35, 130, r3, "#22d3ee", true, 2);
+
+    plotCtx.save();
+    plotCtx.fillStyle = cssVar("--muted");
+    plotCtx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    plotCtx.fillText(
+      `t=${t.toFixed(1)}s/${horizon}s | modo=${modeEl.value.toUpperCase()} | disturbio=${distEl.value} | gear=${gear} | rpm=${Math.round(rpm)}`,
+      pad, rect.height - 8
+    );
+    plotCtx.restore();
+  }
+
+  // ---------- Main render ----------
+  function renderAll(){
+    renderTop();
+    renderHill();
+    renderSpeedGauge();
+    renderRpmGauge();
+    renderPlots();
+  }
+
+  function tick(){
+    if (running){
+      for (let i=0; i<2; i++){
+        if (t >= horizon){ running = false; break; }
+        step();
+      }
+    }
+    // Always render so UI changes are instant
+    renderAll();
+    requestAnimationFrame(tick);
+  }
+
+  // ---------- UI events ----------
+  function syncUI(){
+    targetVal.textContent = (+targetEl.value).toFixed(1) + " m/s";
+  }
+
+  targetEl.addEventListener("input", () => { syncUI(); });
+  stepBtn.addEventListener("click", () => { targetEl.value = 14; syncUI(); });
+
+  runBtn.addEventListener("click", () => { reset(); syncUI(); running = true; });
+  pauseBtn.addEventListener("click", () => {
+    running = !running;
+    pauseBtn.textContent = running ? "⏸ Pausar" : "▶ Reanudar";
+  });
+
+  gbEl.addEventListener("change", () => {
+    // optional: re-center gearbox behavior immediately
+    if (gbEl.value !== "on") gear = 3;
+  });
+
+  window.addEventListener("resize", () => { renderAll(); });
+
+  // init
+  initTerrain();
+  syncUI();
+  reset();
+  renderAll();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Demo Control PID - Truck Speed (Offline)</title>
+  <style>
+    :root {
+      /* Industrial / tech palette */
+      --bg: #0b0f14;
+      --panel: #121826;
+      --panel2: #0f172a;
+      --text: #e5e7eb;
+      --muted: #a3adc2;
+      --accent: #ffcc00;  /* amarillo industrial inspirado */
+      --accent2: #ffd84d;
+      --good: #36d399;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+      --grid: rgba(255,255,255,0.07);
+      --line: rgba(255,255,255,0.18);
+      --border: rgba(255,255,255,0.10);
+      --shadow: rgba(0,0,0,0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(255,204,0,0.12), transparent 60%),
+        linear-gradient(180deg, #06080c, var(--bg));
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", sans-serif;
+    }
+
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(18,24,38,0.72);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(255,204,0,0.14);
+      border: 1px solid rgba(255,204,0,0.35);
+      color: var(--accent2);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .wrap {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1000px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(18,24,38,0.75);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+
+    .controls label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 6px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(8,10,18,0.65);
+      color: var(--text);
+      outline: none;
+    }
+
+    input[type="number"]:focus, select:focus {
+      border-color: rgba(255,204,0,0.55);
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.10);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,204,0,0.40);
+      background: linear-gradient(180deg, rgba(255,204,0,0.45), rgba(255,204,0,0.18));
+      color: #111827;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: rgba(255,204,0,0.70);
+      filter: brightness(1.03);
+    }
+
+    .btn2 {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .btn2:hover {
+      border-color: rgba(255,255,255,0.22);
+      filter: none;
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .kpi .box {
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(8,10,18,0.45);
+    }
+
+    .kpi .val {
+      font-size: 18px;
+      font-weight: 900;
+      margin-top: 4px;
+      letter-spacing: 0.2px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      font-size: 11px;
+      color: var(--muted);
+      margin-right: 6px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 560px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(8,10,18,0.45);
+      display: block;
+    }
+
+    .footnote {
+      padding: 0 16px 18px;
+      max-width: 1280px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>
+    Demo Offline — Control de Velocidad (Truck) con P/PI/PID + Saturación + “Protección térmica”
+    <span class="pill">SIN INTERNET</span>
+  </h1>
+  <p>Modelo simplificado para enseñar feedback, disturbios y límites físicos (no representa un sistema real).</p>
+</header>
+
+<div class="wrap">
+  <div class="card controls">
+    <div class="row">
+      <div>
+        <label>Modo de control</label>
+        <select id="mode">
+          <option value="none">Sin control (open-loop)</option>
+          <option value="p">P</option>
+          <option value="pi">PI</option>
+          <option value="pid" selected>PID</option>
+        </select>
+      </div>
+      <div>
+        <label>Disturbio: “pendiente/carga”</label>
+        <select id="dist">
+          <option value="off">Off</option>
+          <option value="step" selected>Step (8s–14s fuerte)</option>
+          <option value="wave">Onda (cambios suaves)</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Velocidad objetivo (m/s)</label>
+    <input id="target" type="range" min="0" max="22" value="10" step="0.5">
+    <div class="row">
+      <div class="muted">Target: <span id="targetVal"></span></div>
+      <div class="muted">Tip: usa “Step a 14 m/s” para un cambio de consigna</div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Kp</label>
+        <input id="kp" type="number" min="0" max="5" step="0.05" value="0.9">
+      </div>
+      <div>
+        <label>Ki</label>
+        <input id="ki" type="number" min="0" max="2" step="0.01" value="0.35">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Kd</label>
+        <input id="kd" type="number" min="0" max="1" step="0.01" value="0.06">
+      </div>
+      <div>
+        <label>Límite base de torque |u|</label>
+        <input id="ulim" type="number" min="0.2" max="1.2" step="0.05" value="1.0">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Protección térmica</label>
+        <select id="prot">
+          <option value="on" selected>On (reduce límite si temp sube)</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+      <div>
+        <label>Tiempo de simulación (s)</label>
+        <input id="horizon" type="number" min="10" max="60" step="5" value="25">
+      </div>
+    </div>
+
+    <button id="run">▶ Ejecutar / Reiniciar</button>
+    <button class="btn2" id="pause">⏸ Pausar</button>
+    <button class="btn2" id="step14">⚡ Step a 14 m/s</button>
+
+    <div class="kpi">
+      <div class="box">
+        <div class="muted">Velocidad actual</div>
+        <div class="val" id="vNow">—</div>
+      </div>
+      <div class="box">
+        <div class="muted">Temp (ficticia)</div>
+        <div class="val" id="tNow">—</div>
+      </div>
+      <div class="box">
+        <div class="muted">Comando u (torque)</div>
+        <div class="val" id="uNow">—</div>
+      </div>
+      <div class="box">
+        <div class="muted">Límite actual |u|</div>
+        <div class="val" id="ulimNow">—</div>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:10px">
+      <span class="tag">Feedback</span>
+      <span class="tag">Saturación</span>
+      <span class="tag">Disturbios</span>
+      <span class="tag">Protección</span>
+
+      <div style="margin-top:8px">
+        Qué observar:
+        <ul>
+          <li>Overshoot (se pasa) y settling (estabiliza)</li>
+          <li>Qué ocurre con pendiente/carga (disturbio)</li>
+          <li>Qué pasa al saturar y cuando la protección reduce el límite</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <canvas id="cv" width="1200" height="560"></canvas>
+  </div>
+</div>
+
+<div class="footnote">
+  Nota: el modelo y la “temperatura” son didácticos para enseñar conceptos. Funciona 100% offline.
+</div>
+
+<script>
+(() => {
+  // ---------- UI ----------
+  const $ = (id) => document.getElementById(id);
+  const modeEl = $("mode"), distEl = $("dist"), targetEl = $("target");
+  const kpEl = $("kp"), kiEl = $("ki"), kdEl = $("kd"), ulimEl = $("ulim");
+  const protEl = $("prot"), horizonEl = $("horizon");
+  const runBtn = $("run"), pauseBtn = $("pause"), stepBtn = $("step14");
+  const targetVal = $("targetVal");
+  const vNow = $("vNow"), tNow = $("tNow"), uNow = $("uNow"), ulimNow = $("ulimNow");
+
+  // ---------- Simulation parameters ----------
+  const dt = 0.02; // 50 Hz
+  let horizon = 25;
+  let running = false;
+
+  // State
+  let t = 0, v = 0, temp = 40, u = 0;
+  let integ = 0, prevE = 0;
+
+  // Plant params (normalized, educational)
+  const a = 2.0;   // actuator effectiveness
+  const b = 0.35;  // drag
+  const m = 1.0;   // effective mass (normalized)
+
+  // Data buffers for plotting
+  const buf = { t: [], r: [], v: [], u: [], temp: [], grade: [], ulim: [] };
+
+  function gradeProfile(time) {
+    const dist = distEl.value;
+    if (dist === "off") return 0;
+    if (dist === "step") {
+      if (time >= 8 && time < 14) return 0.8;
+      if (time >= 18) return 0.3;
+      return 0;
+    }
+    if (dist === "wave") {
+      return 0.35 + 0.25 * Math.sin(time * 0.6);
+    }
+    return 0;
+  }
+
+  function updateKPIs(currUlim) {
+    vNow.textContent = v.toFixed(2) + " m/s";
+    tNow.textContent = temp.toFixed(1) + " °C";
+    uNow.textContent = u.toFixed(2);
+    ulimNow.textContent = currUlim.toFixed(2);
+  }
+
+  function reset() {
+    horizon = +horizonEl.value || 25;
+    t = 0; v = 0; temp = 40; u = 0;
+    integ = 0; prevE = 0;
+    for (const k in buf) buf[k] = [];
+    pauseBtn.textContent = "⏸ Pausar";
+  }
+
+  function step() {
+    const r = +targetEl.value;
+    const Kp = +kpEl.value, Ki = +kiEl.value, Kd = +kdEl.value;
+    const ulimBase = +ulimEl.value;
+    const grade = gradeProfile(t);
+
+    const e = r - v;
+
+    // protection: reduce ulim if temp too high
+    let currUlim = ulimBase;
+    if (protEl.value === "on") {
+      if (temp > 95) currUlim = Math.max(0.35, ulimBase - 0.01 * (temp - 95));
+    }
+
+    // controller
+    const mode = modeEl.value;
+    if (mode === "none") {
+      u = (e > 0) ? 0.6 : 0.0;
+    } else if (mode === "p") {
+      u = Kp * e;
+    } else if (mode === "pi") {
+      integ += e * dt;
+      u = Kp * e + Ki * integ;
+    } else if (mode === "pid") {
+      integ += e * dt;
+      const deriv = (e - prevE) / dt;
+      prevE = e;
+      u = Kp * e + Ki * integ + Kd * deriv;
+    }
+
+    // saturate
+    u = Math.max(-currUlim, Math.min(currUlim, u));
+
+    // plant
+    const vdot = (a * u - b * v - grade) / m;
+    v += vdot * dt;
+
+    // fictitious temp dynamics
+    const tempDot = 6.0 * Math.abs(u) + 4.0 * grade - 0.12 * (temp - 40);
+    temp += tempDot * dt;
+
+    // record
+    buf.t.push(t);
+    buf.r.push(r);
+    buf.v.push(v);
+    buf.u.push(u);
+    buf.temp.push(temp);
+    buf.grade.push(grade);
+    buf.ulim.push(currUlim);
+
+    t += dt;
+    updateKPIs(currUlim);
+  }
+
+  // ---------- Plotting ----------
+  const canvas = $("cv");
+  const ctx = canvas.getContext("2d");
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function clear() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+  function drawGrid(x0, y0, w, h, xTicks, yTicks) {
+    ctx.save();
+    ctx.strokeStyle = cssVar("--grid");
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= xTicks; i++) {
+      const x = x0 + (w * i) / xTicks;
+      ctx.beginPath();
+      ctx.moveTo(x, y0);
+      ctx.lineTo(x, y0 + h);
+      ctx.stroke();
+    }
+    for (let j = 0; j <= yTicks; j++) {
+      const y = y0 + (h * j) / yTicks;
+      ctx.beginPath();
+      ctx.moveTo(x0, y);
+      ctx.lineTo(x0 + w, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function plotSeries(x, y, xMin, xMax, yMin, yMax, rect, color, dashed=false, width=2) {
+    if (x.length < 2) return;
+    const {x0, y0, w, h} = rect;
+    const X = (val) => x0 + ((val - xMin) / (xMax - xMin)) * w;
+    const Y = (val) => y0 + h - ((val - yMin) / (yMax - yMin)) * h;
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dashed ? [8,6] : []);
+    ctx.beginPath();
+    ctx.moveTo(X(x[0]), Y(y[0]));
+    for (let i=1; i<x.length; i++) ctx.lineTo(X(x[i]), Y(y[i]));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawLabel(text, x, y, color=cssVar("--muted")) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function render() {
+    clear();
+
+    const pad = 22;
+    const plotH = (canvas.height - pad*2 - 20) / 3;
+    const plotW = canvas.width - pad*2;
+
+    const r1 = {x0: pad, y0: pad, w: plotW, h: plotH};
+    const r2 = {x0: pad, y0: pad + plotH + 10, w: plotW, h: plotH};
+    const r3 = {x0: pad, y0: pad + 2*(plotH + 10), w: plotW, h: plotH};
+
+    const tMax = Math.max(horizon, 1);
+    const x = buf.t;
+
+    // Velocity plot
+    drawGrid(r1.x0, r1.y0, r1.w, r1.h, 10, 6);
+    drawLabel("Velocidad vs Objetivo", r1.x0, r1.y0 - 6, cssVar("--text"));
+    plotSeries(x, buf.r, 0, tMax, 0, 24, r1, cssVar("--line"), true, 2);
+    plotSeries(x, buf.v, 0, tMax, 0, 24, r1, cssVar("--accent2"), false, 3);
+    drawLabel("target (— —)", r1.x0 + 10, r1.y0 + 14, cssVar("--muted"));
+    drawLabel("velocidad (—)", r1.x0 + 140, r1.y0 + 14, cssVar("--accent2"));
+
+    // u plot
+    drawGrid(r2.x0, r2.y0, r2.w, r2.h, 10, 6);
+    drawLabel("Comando (torque) y límites", r2.x0, r2.y0 - 6, cssVar("--text"));
+    plotSeries(x, buf.u, 0, tMax, -1.2, 1.2, r2, cssVar("--good"), false, 3);
+    plotSeries(x, buf.ulim, 0, tMax, -1.2, 1.2, r2, cssVar("--bad"), true, 2);
+    plotSeries(x, buf.ulim.map(v => -v), 0, tMax, -1.2, 1.2, r2, cssVar("--bad"), true, 2);
+
+    // temp + grade plot
+    drawGrid(r3.x0, r3.y0, r3.w, r3.h, 10, 6);
+    drawLabel("Temperatura (ficticia) + carga (escala)", r3.x0, r3.y0 - 6, cssVar("--text"));
+    plotSeries(x, buf.temp, 0, tMax, 35, 130, r3, "#e879f9", false, 3);
+    plotSeries(x, buf.grade.map(g => 40 + g*20), 0, tMax, 35, 130, r3, "#22d3ee", true, 2);
+    drawLabel("temp (—)", r3.x0 + 10, r3.y0 + 14, "#e879f9");
+    drawLabel("carga (— —)", r3.x0 + 90, r3.y0 + 14, "#22d3ee");
+
+    // footer
+    ctx.save();
+    ctx.fillStyle = cssVar("--muted");
+    ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Arial";
+    ctx.fillText(`t = ${t.toFixed(1)}s / ${horizon}s | modo = ${modeEl.value.toUpperCase()} | disturbio = ${distEl.value}`, pad, canvas.height - 8);
+    ctx.restore();
+  }
+
+  function tick() {
+    if (running) {
+      for (let i=0; i<2; i++) {
+        if (t >= horizon) { running = false; break; }
+        step();
+      }
+      render();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function syncUI() {
+    targetVal.textContent = (+targetEl.value).toFixed(1) + " m/s";
+  }
+
+  targetEl.addEventListener("input", syncUI);
+  stepBtn.addEventListener("click", () => { targetEl.value = 14; syncUI(); });
+
+  runBtn.addEventListener("click", () => { reset(); syncUI(); running = true; });
+  pauseBtn.addEventListener("click", () => {
+    running = !running;
+    pauseBtn.textContent = running ? "⏸ Pausar" : "▶ Reanudar";
+  });
+
+  // init
+  syncUI();
+  reset();
+  render();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
